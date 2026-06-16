@@ -44,6 +44,11 @@ th{
 .first-row{
     background-color: #1B2024;
 }
+.f-name{
+    color: #8ED5FF;
+    font-family: Inter;
+    font-size: 10px;
+}
 .title{
     color: #BDC8D1;
     font-family: Inter;

@@ -1,10 +1,8 @@
 import './styling/timetable.css'
 import { weeklyTimetableMock } from '../MockData/WeeklyTimeTable';
-import { coursesLookup } from '../MockData/WeeklyTimeTable';
 export default function TimeTable(props) {
   const days = ["MON", "TUE", "WED", "THU", "FRI", "SAT"];
   const data = weeklyTimetableMock
-  const courseData = coursesLookup
   return (
     <div id="mainbox">
       <div id="thead">
@@ -24,11 +22,13 @@ export default function TimeTable(props) {
                 <th colSpan={2}>{curr.timeSlot}</th>
                 {curr.schedule.map((data) => {
                   return (
-                    data === null ? <td colSpan={3}></td> : <td id='course-data' colSpan={3}>{data}
+                    data === null ? <td colSpan={3}></td> : <td id='course-data' colSpan={3}>{data.courseCode}
                     <br></br>
-                    <span className='title'>{courseData[data] && courseData[data].title}</span>
+                    <span className='title'>{data.courseName}</span>
+                    <br></br> 
+                    <span className='f-name'>{data.facultyName}</span>
                     <br></br>
-                    <span className='room'>{courseData[data] && courseData[data].room}</span>
+                    <span className='room'>{data.roomNo}</span>
                     </td>
                   )
                 })}
