@@ -1,3 +1,6 @@
+//all the code+comments written are cross verified with the documentation ; if u have any suggestions for improvement please let me know :)
+
+
 import { useState } from "react";
 import axios from "axios";
 import { useAuth } from "../context/Auth";
@@ -8,40 +11,28 @@ export default function SignUp() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
-  const [batch, setBatch] = useState("cse1"); 
-  const [semester, setSemester] = useState("1"); 
+  const [batch, setBatch] = useState("CSE 1"); 
+  const [semester, setSemester] = useState("Semester 1"); 
 
   const { user, setUser } = useAuth();
   const nav = useNavigate();
 
-  const getYearFromSemester = (sem) => {
-    const semNum = parseInt(sem, 10);
-    if (semNum <= 2) return 1;
-    if (semNum <= 4) return 2;
-    if (semNum <= 6) return 3;
-    return 4;
-  };
-
   const handleSignup = async (e) => {
     e.preventDefault();
     try {
+      // Express register expects this exact shape in the request body.
+      // Full route: POST http://localhost:5000/api/auth/register
       const newUserPayload = {
-        id: self.crypto.randomUUID(),
-        email: email,
-        password: password,
-        token: `mock-jwt-token-${Math.random().toString(36).substr(2, 9)}`, 
-        user: {
-          name: name, 
-          email: email,
-          batch: batch, 
-          year: getYearFromSemester(semester), 
-          semester: semester 
-        }
+        name,
+        email,
+        batch,
+        semester,
+        password
       };
 
-      const response = await axios.post("http://localhost:5000/auth", newUserPayload);
+      const response = await axios.post("http://localhost:5000/api/auth/register", newUserPayload);
       
-      if (response.status === 201 || response.data) {
+      if (response.status === 201) {
         alert("Account SuccessFully Created");
         nav("/Login");
       }
@@ -97,10 +88,10 @@ export default function SignUp() {
                 className="select-input" 
                 required
               >
-                <option value="cse1">CSE 1</option>
-                <option value="cse2">CSE 2</option>
-                <option value="mnc">MNC</option>
-                <option value="ece">ECE</option>
+                <option value="CSE 1">CSE 1</option>
+                <option value="CSE 2">CSE 2</option>
+                <option value="MNC">MNC</option>
+                <option value="ECE">ECE</option>
               </select>
             </div>
           </div>
@@ -114,14 +105,14 @@ export default function SignUp() {
                 className="select-input"
                 required
               >
-                <option value="1">Semester 1</option>
-                <option value="2">Semester 2</option>
-                <option value="3">Semester 3</option>
-                <option value="4">Semester 4</option>
-                <option value="5">Semester 5</option>
-                <option value="6">Semester 6</option>
-                <option value="7">Semester 7</option>
-                <option value="8">Semester 8</option>
+                <option value="Semester 1">Semester 1</option>
+                <option value="Semester 2">Semester 2</option>
+                <option value="Semester 3">Semester 3</option>
+                <option value="Semester 4">Semester 4</option>
+                <option value="Semester 5">Semester 5</option>
+                <option value="Semester 6">Semester 6</option>
+                <option value="Semester 7">Semester 7</option>
+                <option value="Semester 8">Semester 8</option>
               </select>
             </div>
           </div>

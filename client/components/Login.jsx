@@ -1,9 +1,12 @@
+//all the code+comments written are cross verified with the documentation ; if u have any suggestions for improvement please let me know :)
+
+
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useAuth } from "../context/Auth";
 import "./styling/Login.css";
-import { useNavigate,Route,Routes,Link } from "react-router-dom";
-import SignUp from "./Signup";
+import { useNavigate, Link } from "react-router-dom";
+
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -18,15 +21,20 @@ export default function Login() {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      // backend se aayga tab... const response = await axios.post("mohit diksha url",{email ,password})
-      const mockUrl = `http://localhost:5000/auth?email=${email}&password=${password}`;
-      const response = await axios.get(mockUrl);
+      // Express login expects a POST request with email and password in the request body.
+      // The full backend route is: POST http://localhost:5000/api/auth/login
+      const response = await axios.post("http://localhost:5000/api/auth/login", {
+        email,
+        password
+      });
       
-      if (response.data && response.data.length > 0) {
-        localStorage.setItem("userToken", response.data[0].token);
-        localStorage.setItem("userProfile", JSON.stringify(response.data[0].user));
-        setUser(response.data[0].user);
-        window.location.href = "/dashboard";
+      // Backend returns an object like: { message, user, token }
+      // So we read response.data.token and response.data.user directly.
+      if (response.data?.token && response.data?.user) {
+        localStorage.setItem("userToken", response.data.token);
+        localStorage.setItem("userProfile", JSON.stringify(response.data.user));
+        setUser(response.data.user);
+        nav("/dashboard");
       } else {
         alert("Invalid Email or Password!");
       }
