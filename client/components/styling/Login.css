@@ -1,0 +1,177 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+.portal-container {
+  background-color: #0d1527;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  font-family: 'Space Grotesk', sans-serif;
+  color: #ffffff;
+}
+
+.portal-header {
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+.portal-header h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #55bfff;
+  margin: 0 0 5px 0;
+  letter-spacing: 0.5px;
+}
+
+.portal-header p {
+  color: #7b889b;
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.login-card {
+  background-color: #141f32;
+  border: 1px solid #1e2d44;
+  border-radius: 6px;
+  padding: 40px;
+  width: 380px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+.input-group {
+  margin-bottom: 24px;
+}
+
+.input-group label {
+  display: block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  color: #7b889b;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+}
+
+.label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.forgot-link {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  color: #55bfff;
+  text-decoration: none;
+}
+
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-icon {
+  position: absolute;
+  left: 12px;
+  font-size: 0.9rem;
+  opacity: 0.4;
+}
+
+.input-wrapper input {
+  width: 100%;
+  background-color: #0b111e;
+  border: 1px solid #1e2d44;
+  border-radius: 4px;
+  padding: 14px 14px 14px 40px;
+  color: #ffffff;
+  font-size: 0.95rem;
+  outline: none;
+  font-family: 'JetBrains Mono', monospace;
+  transition: border-color 0.2s ease;
+}
+
+.input-wrapper input::placeholder {
+  color: #3e4d64;
+}
+
+.input-wrapper input:focus {
+  border-color: #55bfff;
+}
+
+.login-btn {
+  width: 100%;
+  background-color: #38bdf8; 
+  color: #0b111e;
+  border: none;
+  border-radius: 4px;
+  padding: 14px;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  letter-spacing: 1px;
+  transition: background-color 0.2s ease;
+  margin-top: 10px;
+}
+
+.login-btn:hover {
+  background-color: #0ea5e9;
+}
+
+.signup-text {
+  text-align: center;
+  margin-top: 30px;
+  font-size: 0.85rem;
+  color: #7b889b;
+}
+
+.signup-text a {
+  color: #55bfff;
+  text-decoration: none;
+}
+
+.signup-text a:hover {
+  text-decoration: underline;
+}
+.input-wrapper select.select-input {
+  width: 100%;
+  padding: 10px 5px;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #ffffff; 
+  font-size: 1rem;
+  font-family: inherit;
+  cursor: pointer;
+  appearance: none; 
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+.input-wrapper:has(.select-input)::after {
+  content: "▼";
+  font-size: 0.75rem;
+  color: #888;
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.select-input option {
+  background-color: #1a1a2e; 
+  color: #ffffff;
+  padding: 10px;
+}
+
+.input-group {
+  margin-bottom: 1.25rem;
+}
+
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}

@@ -8,7 +8,11 @@ import Home from '../components/Home'
 import DashBoard from '../components/DashBoard'
 import CourseCard from '../components/CourseCard'
 import Material from '../components/Material'
+import { useContext } from 'react'
+import { useAuth } from '../context/Auth'
+import SignUp from '../components/SignUp'
 function App() {
+  const {user} = useAuth();
   return (
     <>
       <div className="webpage">
@@ -18,7 +22,7 @@ function App() {
             <h3>College PORTAL</h3>
           </div>
           <ul>
-            <li><NavLink to="/login" style={{ textDecoration: "none", color: "inherit" }} >Login</NavLink></li>
+            <li>{(user===null) && <NavLink to="/login" style={{ textDecoration: "none", color: "inherit" }} >Login</NavLink>}</li>
             <li><NavLink to="/profile" style={{ textDecoration: "none", color: "inherit" }}>Profile</NavLink></li>
             <li><NavLink to="/dashboard" style={{ textDecoration: "none", color: "inherit" }}>DashBoard</NavLink></li>
             <li><NavLink to="/timetable" style={{ textDecoration: "none", color: "inherit" }}>TimeTable</NavLink></li>
@@ -36,6 +40,7 @@ function App() {
             <Route path='/dashboard' element={<DashBoard />} />
             <Route path='/material' element={<Material />} />
             <Route path='/coursecard' element={<CourseCard />} />
+            <Route path="/signup" element={<SignUp />}/>
             <Route path='*' element={<Home />} />
           </Routes>
         </main>

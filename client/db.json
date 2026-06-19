@@ -1,0 +1,31 @@
+{
+  "auth": [
+    {
+      "id": "1",
+      "email": "rohan@iiitsurat.ac.in",
+      "password": "abc@1234",
+      "token": "mock-jwt-token-xyz123",
+      "user": {
+        "name": "Rohan Kaushik",
+        "email": "rohan@iiitsurat.ac.in",
+        "batch": "cse2",
+        "year": "2",
+        "semester": "2"
+      }
+    },
+    {
+      "id": "JUY7uCfQh08",
+      "email": "mohit@iiitsurat.ac.in",
+      "password": "abc@1234",
+      "token": "mock-jwt-token-83wwcokuy",
+      "user": {
+        "name": "",
+        "email": "mohit@iiitsurat.ac.in",
+        "batch": "cse2",
+        "year": "2",
+        "semester": "4"
+      }
+    }
+  ],
+  "$schema": "./node_modules/json-server/schema.json"
+}
