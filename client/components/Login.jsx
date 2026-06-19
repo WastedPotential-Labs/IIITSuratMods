@@ -6,6 +6,7 @@ import axios from "axios";
 import { useAuth } from "../context/Auth";
 import "./styling/Login.css";
 import { useNavigate, Link } from "react-router-dom";
+import {BlinkBlur}  from 'react-loading-indicators';
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -18,8 +19,10 @@ export default function Login() {
       nav("/dashboard")
     }
   },[user])
+  const [loading,setLoading] = useState(false);
   const handleLogin = async (e) => {
     e.preventDefault();
+    setLoading(true);
     try {
       // Express login expects a POST request with email and password in the request body.
       // The full backend route is: POST http://localhost:5000/api/auth/login
@@ -83,6 +86,11 @@ export default function Login() {
           </div>
 
           <button type="submit" className="login-btn">LOGIN</button>
+          {loading && 
+          <div id="loading-anim">
+            <BlinkBlur color="#0ea5e9" size="medium" text="" textColor="" />
+          </div>}
+
         </form>
 
         <div className="signup-text">

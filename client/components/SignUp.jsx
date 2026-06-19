@@ -6,7 +6,7 @@ import axios from "axios";
 import { useAuth } from "../context/Auth";
 import "./styling/Login.css";
 import { useNavigate, Link } from "react-router-dom";
-
+import {BlinkBlur}  from 'react-loading-indicators';
 export default function SignUp() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -16,9 +16,10 @@ export default function SignUp() {
 
   const { user, setUser } = useAuth();
   const nav = useNavigate();
-
+  const [loading,setLoading] = useState(false);
   const handleSignup = async (e) => {
     e.preventDefault();
+    setLoading(true);
     try {
       // Express register expects this exact shape in the request body.
       // Full route: POST http://localhost:5000/api/auth/register
@@ -132,6 +133,10 @@ export default function SignUp() {
           </div>
 
           <button type="submit" className="login-btn">SignUp</button>
+          {loading && 
+          <div id="loading-anim">
+            <BlinkBlur color="#0ea5e9" size="medium" text="" textColor="" />
+          </div>}
         </form>
 
         <div className="signup-text">

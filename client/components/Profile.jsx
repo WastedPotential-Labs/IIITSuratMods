@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { useAuth } from "../context/Auth";
 import "./styling/Profile.css";
-
+import {BlinkBlur}  from 'react-loading-indicators';
 const allowedBatches = ["CSE 1", "CSE 2", "MNC", "ECE"];
 const allowedSemesters = [
   "Semester 1",
@@ -65,6 +65,11 @@ export default function Profile() {
       [name]: value
     }));
   };
+  function handleLogout(){
+    localStorage.removeItem("userToken");
+    localStorage.removeItem("userProfile");
+    window.location.reload();
+  }
 
   const handleSave = async () => {
     try {
@@ -113,7 +118,10 @@ export default function Profile() {
   };
 
   if (loading) {
-    return <div className="profile-container"><p>Loading profile...</p></div>;
+    return <div className="loading-container">
+            <p>Loading profile...</p>
+            <BlinkBlur color="#0ea5e9" size="medium" text="" textColor="" />
+          </div>;
   }
 
   if (!user) {
@@ -232,6 +240,7 @@ export default function Profile() {
 
         {/* Edit Profile Button */}
         {!isEditing && (
+          <>
           <div className="action-box">
             <button
               className="edit-btn"
@@ -240,6 +249,10 @@ export default function Profile() {
               EDIT PROFILE
             </button>
           </div>
+          <div className="action-box">
+            <button className="logout-btn" onClick={handleLogout}>Logout</button>
+          </div>
+          </>
         )}
       </div>
     </div>
