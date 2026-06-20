@@ -134,6 +134,37 @@
 .signup-text a:hover {
   text-decoration: underline;
 }
+
+.auth-message {
+  margin: 16px 0 0;
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+.auth-error {
+  color: #fca5a5;
+}
+
+.auth-success {
+  color: #86efac;
+}
+
+.text-button {
+  width: 100%;
+  margin-top: 16px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #55bfff;
+  cursor: pointer;
+  font: inherit;
+}
+
+.text-button:disabled,
+.login-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
 .input-wrapper select.select-input {
   width: 100%;
   padding: 10px 5px;

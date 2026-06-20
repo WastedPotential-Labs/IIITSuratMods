@@ -11,6 +11,8 @@ import Material from '../components/Material'
 import { useContext, useState } from 'react'
 import { useAuth } from '../context/Auth'
 import SignUp from '../components/SignUp'
+import VerifyEmail from '../components/VerifyEmail'
+import ForgotPassword from '../components/ForgotPassword'
 function App() {
   const { user } = useAuth();
   const [navBar,setNavBar] = useState(true);
@@ -50,6 +52,8 @@ function App() {
             <Route path='/material' element={<Material />} />
             <Route path='/coursecard' element={<CourseCard />} />
             <Route path="/signup" element={<SignUp />} />
+            <Route path="/verify-email" element={<VerifyEmail />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path='*' element={<Home />} />
           </Routes>
         </main>

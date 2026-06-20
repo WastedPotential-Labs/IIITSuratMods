@@ -73,7 +73,7 @@ export default function Login() {
           <div className="input-group">
             <div className="label-row">
               <label>PASSWORD</label>
-              <a href="#forgot" className="forgot-link">Forgot?</a>
+              <Link to="/forgot-password" className="forgot-link">Forgot?</Link>
             </div>
             <div className="input-wrapper">
               <span className="input-icon">🔒</span>

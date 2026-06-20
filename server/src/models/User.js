@@ -17,6 +17,44 @@ const userSchema = new mongoose.Schema(
       lowercase: true,
       trim: true
     },
+    emailVerified: {
+      type: Boolean,
+      default: false
+    },
+    emailOtpHash: {
+      type: String,
+      select: false
+    },
+    emailOtpExpiresAt: {
+      type: Date,
+      select: false
+    },
+    emailOtpAttempts: {
+      type: Number,
+      default: 0,
+      select: false
+    },
+    emailOtpLastSentAt: {
+      type: Date,
+      select: false
+    },
+    passwordResetOtpHash: {
+      type: String,
+      select: false
+    },
+    passwordResetOtpExpiresAt: {
+      type: Date,
+      select: false
+    },
+    passwordResetOtpAttempts: {
+      type: Number,
+      default: 0,
+      select: false
+    },
+    passwordResetOtpLastSentAt: {
+      type: Date,
+      select: false
+    },
     password: {
       type: String,
       required: true,
