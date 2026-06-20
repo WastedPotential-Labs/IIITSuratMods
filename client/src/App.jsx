@@ -13,12 +13,11 @@ import { useAuth } from '../context/Auth'
 import SignUp from '../components/SignUp'
 function App() {
   const { user } = useAuth();
-  const [navBar,setNavBar] = useState(true);
+  const [navBar,setNavBar] = useState(false);
   return (
     <>
       <div className="webpage">
-        {navBar &&
-        <aside className="navbar">
+        <aside className={`navbar ${navBar ? 'open' : ''}`}>
           <div id="head">
             <h1>IIITSuratMods</h1>
           </div>
@@ -32,7 +31,6 @@ function App() {
             <li><NavLink to="/admin" style={{ textDecoration: "none", color: "inherit" }}>Admin</NavLink></li>
           </ul>
         </aside>
-}
         <main className="main-content">
           <button
             className="menu-toggle-btn"
