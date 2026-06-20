@@ -22,7 +22,7 @@ function App() {
           <div id="head">
             <h1>IIITSuratMods</h1>
           </div>
-          <ul onClick={()=>setNavBar(false)}>
+          <ul onClick={()=>setNavBar(!navBar)}>
             <li>{(user === null) && <NavLink to="/login" style={{ textDecoration: "none", color: "inherit" }} >Login</NavLink>}</li>
             <li><NavLink to="/profile" style={{ textDecoration: "none", color: "inherit" }}>Profile</NavLink></li>
             <li><NavLink to="/dashboard" style={{ textDecoration: "none", color: "inherit" }}>DashBoard</NavLink></li>
@@ -50,7 +50,7 @@ function App() {
             <Route path='/material' element={<Material />} />
             <Route path='/coursecard' element={<CourseCard />} />
             <Route path="/signup" element={<SignUp />} />
-            <Route path='*' element={<Home />} />
+            <Route path='*' element={<Login />} />
           </Routes>
         </main>
       </div>

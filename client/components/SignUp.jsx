@@ -40,6 +40,7 @@ export default function SignUp() {
     } catch (err) {
       alert(err + "SignUp Failed");
     }
+    setLoading(false)
   };
 
   return (
