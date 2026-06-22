@@ -3,10 +3,9 @@
 
 import { useState } from "react";
 import axios from "axios";
-import { useAuth } from "../context/Auth";
 import "./styling/Login.css";
 import { useNavigate, Link } from "react-router-dom";
-import {BlinkBlur}  from 'react-loading-indicators';
+import { BlinkBlur } from "react-loading-indicators";
 export default function SignUp() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -14,12 +13,13 @@ export default function SignUp() {
   const [batch, setBatch] = useState("CSE 1"); 
   const [semester, setSemester] = useState("Semester 1"); 
 
-  const { user, setUser } = useAuth();
   const nav = useNavigate();
   const [loading,setLoading] = useState(false);
+  const [error, setError] = useState("");
   const handleSignup = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setError("");
     try {
       // Express register expects this exact shape in the request body.
       // Full route: POST http://localhost:5000/api/auth/register
@@ -34,11 +34,12 @@ export default function SignUp() {
       const response = await axios.post("http://localhost:5000/api/auth/register", newUserPayload);
       
       if (response.status === 201) {
-        alert("Account SuccessFully Created");
-        nav("/Login");
+        nav(`/verify-email?email=${encodeURIComponent(response.data.email || email)}`);
       }
     } catch (err) {
-      alert(err + "SignUp Failed");
+      setError(err.response?.data?.message || "Sign up failed. Please try again.");
+    } finally {
+      setLoading(false);
     }
     setLoading(false)
   };
@@ -134,6 +135,7 @@ export default function SignUp() {
           </div>
 
           <button type="submit" className="login-btn">SignUp</button>
+          {error && <p className="auth-message auth-error">{error}</p>}
           {loading && 
           <div id="loading-anim">
             <BlinkBlur color="#0ea5e9" size="medium" text="" textColor="" />
@@ -142,6 +144,9 @@ export default function SignUp() {
 
         <div className="signup-text">
           Have an account? <Link to="/login">Login</Link>
+        </div>
+        <div className="signup-text">
+          Already received a code? <Link to="/verify-email">Verify email</Link>
         </div>
       </div>
     </div>
