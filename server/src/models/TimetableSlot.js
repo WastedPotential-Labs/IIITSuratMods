@@ -1,55 +1,68 @@
 import mongoose from "mongoose";
 
-const timetableSlotSchema = new mongoose.Schema(
+const scheduleSchema = new mongoose.Schema(
   {
-    user: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-      index: true
-    },
-    dayOfWeek: {
-      type: String,
-      enum: ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"],
-      required: true
-    },
-    startTime: {
-      type: String,
-      required: true
-    },
-    endTime: {
-      type: String,
-      required: true
-    },
     courseCode: {
       type: String,
       required: true,
-      trim: true
+      trim: true,
     },
     courseName: {
       type: String,
       required: true,
-      trim: true
+      trim: true,
     },
     facultyName: {
       type: String,
       required: true,
-      trim: true
+      trim: true,
     },
     roomNo: {
       type: String,
       required: true,
-      trim: true
+      trim: true,
     },
-    slotType: {
+    group: {
       type: String,
-      enum: ["lecture", "lab", "tutorial"],
-      default: "lecture"
+      default: null,
+      trim: true,
     },
-    isCancelled: {
+  },
+  { _id: false } // slots don't need their own _id, they're embedded
+);
+
+const timetableSlotSchema = new mongoose.Schema(
+  {
+    semester: {
+      type: Number,
+      required: true,
+      min: 1,
+      max: 8,
+    },
+    batch: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    timeSlot: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    isBreak: {
       type: Boolean,
-      default: false
-    }
+      default: false,
+    },
+    schedule: {
+      type: [scheduleSchema], // array of 6 (Mon-Sat), each either a slot object or null
+      default: [null, null, null, null, null, null],
+      validate: {
+        validator: function (arr) {
+          return arr.length === 6;
+        },
+        message: "Schedule must have exactly 6 entries (Monday to Saturday).",
+      },
+    },
   },
   { timestamps: true }
 );
