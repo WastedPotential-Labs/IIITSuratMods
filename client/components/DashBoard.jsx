@@ -7,15 +7,41 @@ import profileIcon from './icons/profile.png'
 import pinIcon from './icons/pin.png'
 dayjs.extend(customParseFormat);
 
+function mergeConsecutiveClasses(classes) {
+  const merged = [];
 
+  for (const cls of classes) {
+    if (merged.length === 0) {
+      merged.push({ ...cls });
+      continue;
+    }
+
+    const last = merged[merged.length - 1];
+
+    const isSameClass =
+      last.courseCode === cls.courseCode &&
+      last.courseName === cls.courseName &&
+      last.facultyName === cls.facultyName &&
+      last.roomNo === cls.roomNo &&
+      last.endTime === cls.startTime;
+
+    if (isSameClass) {
+      // Extend previous class
+      last.endTime = cls.endTime;
+    } else {
+      merged.push({ ...cls });
+    }
+  }
+
+  return merged;
+}
 // for today's classes, startTime and endTime
 function getTodaysClasses(timetable) {
   const jsDay = dayjs().day(); // 0=Sun, 1=Mon, ..., 6=Sat
   if (jsDay === 0) return []; // no classes on sunday
 
   const dayIndex = jsDay - 1; // Monday=0
-
-  return timetable
+  const classes = timetable
     .filter(slot => !slot.isBreak)
     .map(slot => {
       const cls = slot.schedule[dayIndex];
@@ -24,14 +50,17 @@ function getTodaysClasses(timetable) {
       return { ...cls, startTime, endTime };
     })
     .filter(Boolean);
+   const newClasses = mergeConsecutiveClasses(classes);
+   return newClasses;
 }
+
 function getTomorrowClasses(timetable) {
   const jsDay = dayjs().day()+1; // 0=Sun, 1=Mon, ..., 6=Sat
   if (jsDay === 0) return []; // no classes on sunday
 
   const dayIndex = jsDay - 1; // Monday=0
 
-  return timetable
+  const classes = timetable
     .filter(slot => !slot.isBreak)
     .map(slot => {
       const cls = slot.schedule[dayIndex];
@@ -40,6 +69,8 @@ function getTomorrowClasses(timetable) {
       return { ...cls, startTime, endTime };
     })
     .filter(Boolean);
+   const newClasses = mergeConsecutiveClasses(classes);
+   return newClasses;
 }
 
 // for which class is live
