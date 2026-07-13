@@ -26,7 +26,7 @@ function getTodaysClasses(timetable) {
     .filter(Boolean);
 }
 function getTomorrowClasses(timetable) {
-  const jsDay = dayjs().day()+1; // 0=Sun, 1=Mon, ..., 6=Sat
+  const jsDay = (dayjs().day() + 1) % 7; // 0=Sun, 1=Mon, ..., 6=Sat (Saturday+1 wraps to Sunday)
   if (jsDay === 0) return []; // no classes on sunday
 
   const dayIndex = jsDay - 1; // Monday=0
@@ -55,9 +55,9 @@ function useClassStatuses(timetable) {
     const start = dayjs(cls.startTime, 'hh:mm A');
     const end = dayjs(cls.endTime, 'hh:mm A');
     const current = dayjs(now.format('hh:mm A'), 'hh:mm A');
+    let status = 'notLive';
 
     if (current.isAfter(start) && current.isBefore(end)) status = 'live';
-    else status='notLive';
 
     return { ...cls, status };
   });
@@ -88,7 +88,6 @@ function Dashboard() {
   const todaysClasses = getTodaysClasses(weeklyTimetableMock);
   const classesWithStatus = useClassStatuses(todaysClasses);
   const tomorrowClasses = getTomorrowClasses(weeklyTimetableMock);
-  const classesWithStatus2 = useClassStatuses(tomorrowClasses);
   return (
     <>
     <div className="dashboard">
@@ -96,11 +95,11 @@ function Dashboard() {
       <br/>
       <h3 className=''>{dayjs().format('dddd, DD MMM YYYY')} - {todaysClasses.length} Classes Scheduled </h3><br/><br/>
 
-      {todaysClasses.length === 0 ? 
-        (<p>No classes today 🎉</p>)
+      {todaysClasses.length === 0 ?
+        (<p className="empty-day">No classes today 🎉</p>)
         :(<div className="today-schedule-row">
           {classesWithStatus.map((cls) => (
-            <TodayClassCard data={cls} />
+            <TodayClassCard data={cls} key={`today-${cls.startTime}-${cls.courseCode}`} />
           ))}
         </div>)}
     </div>
@@ -111,11 +110,11 @@ function Dashboard() {
       <br/>
       <h3 className=''> {tomorrowClasses.length} Classes Scheduled </h3><br/><br/>
 
-      {tomorrowClasses.length === 0 ? 
-        (<p>No classes Tomorrow 🎉</p>)
+      {tomorrowClasses.length === 0 ?
+        (<p className="empty-day">No classes Tomorrow 🎉</p>)
         :(<div className="today-schedule-row">
           {tomorrowClasses.map((cls) => (
-            <TodayClassCard data={cls} />
+            <TodayClassCard data={cls} key={`tomorrow-${cls.startTime}-${cls.courseCode}`} />
           ))}
         </div>)}
     </div>

@@ -1,6 +1,15 @@
 import TimetableSlot from "../models/TimetableSlot.js";
+import { parseTimeToMinutes } from "../utils/time.js";
 
 const dayNames = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
+
+// startTime is stored as a string, so a Mongo sort puts "10:00" before "9:00".
+// Sort in JS on parsed minutes instead.
+const byStartTime = (a, b) => (parseTimeToMinutes(a.startTime) ?? 0) - (parseTimeToMinutes(b.startTime) ?? 0);
+
+const weekOrder = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
+const byDayThenTime = (a, b) =>
+  weekOrder.indexOf(a.dayOfWeek) - weekOrder.indexOf(b.dayOfWeek) || byStartTime(a, b);
 
 const slotFields = ["dayOfWeek", "startTime", "endTime", "courseCode", "courseName", "facultyName", "roomNo", "slotType", "isCancelled"];
 
@@ -14,7 +23,8 @@ export const getTodayTimetable = async (req, res) => {
       user: req.user._id,
       dayOfWeek: day,
       isCancelled: false
-    }).sort({ startTime: 1 });
+    }).lean();
+    classes.sort(byStartTime);
 
     return res.json({ day, classes });
   } catch (error) {
@@ -24,7 +34,8 @@ export const getTodayTimetable = async (req, res) => {
 
 export const getWeeklyTimetable = async (req, res) => {
   try {
-    const slots = await TimetableSlot.find({ user: req.user._id }).sort({ dayOfWeek: 1, startTime: 1 });
+    const slots = await TimetableSlot.find({ user: req.user._id }).lean();
+    slots.sort(byDayThenTime);
     return res.json({ slots });
   } catch (error) {
     return res.status(500).json({ message: "Unable to load weekly timetable" });

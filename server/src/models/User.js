@@ -80,6 +80,11 @@ const userSchema = new mongoose.Schema(
         "Semester 8"
       ],
       trim: true
+    },
+    role: {
+      type: String,
+      enum: ["user", "admin"],
+      default: "user"
     }
   },
   { timestamps: true }

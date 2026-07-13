@@ -1,42 +1,38 @@
-//all the code+comments written are cross verified with the documentation ; if u have any suggestions for improvement please let me know :)
-
-
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../src/api";
 import { useAuth } from "../context/Auth";
 import "./styling/Login.css";
 import { useNavigate, Link } from "react-router-dom";
-import {BlinkBlur}  from 'react-loading-indicators';
+import { BlinkBlur } from "react-loading-indicators";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { user,setUser } = useAuth();
+  const { user, setUser } = useAuth();
   const nav = useNavigate();
-  useEffect(()=>{
-    const savedProfile = localStorage.getItem("userProfile");
-    if(user || savedProfile){
-      nav("/dashboard")
-    }
-  },[user])
-  const [loading,setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [needsVerification, setNeedsVerification] = useState(false);
-  const handleLogin = async (e) => {
-    e.preventDefault();
+
+  useEffect(() => {
+    const savedProfile = localStorage.getItem("userProfile");
+    if (user || savedProfile) {
+      nav("/dashboard");
+    }
+  }, [user, nav]);
+
+  const handleLogin = async (event) => {
+    event.preventDefault();
     setLoading(true);
     setError("");
     setNeedsVerification(false);
+
     try {
-      // Express login expects a POST request with email and password in the request body.
-      // The full backend route is: POST http://localhost:5000/api/auth/login
-      const response = await axios.post("http://localhost:5000/api/auth/login", {
+      const response = await api.post("/auth/login", {
         email,
         password
       });
-      
-      // Backend returns an object like: { message, user, token }
-      // So we read response.data.token and response.data.user directly.
+
       if (response.data?.token && response.data?.user) {
         localStorage.setItem("userToken", response.data.token);
         localStorage.setItem("userProfile", JSON.stringify(response.data.user));
@@ -46,63 +42,84 @@ export default function Login() {
         setError("Login response was incomplete. Please try again.");
       }
     } catch (err) {
-      setError(err.response?.data?.message || "Login failed. Please try again.");
+      const backendMessage = err.response?.data?.message;
+      const statusText = err.response?.status ? `HTTP ${err.response.status}` : err.code || err.message;
+      setError(backendMessage || `Login failed: ${statusText}`);
       setNeedsVerification(Boolean(err.response?.data?.emailVerificationRequired));
+    } finally {
+      setLoading(false);
     }
-    setLoading(false)
   };
 
   return (
-    <div className="portal-container">
+    <div className="portal-container login-page">
       <div className="portal-header">
-        <h1>IIITSuratMods</h1>
-        <p>IIIT Surat Portal</p>
+        <h1>
+          IIIT<span className="gold">Surat</span><span className="teal">Mods</span>
+        </h1>
+        <p>Login to your college portal</p>
+        <div className="accent-bars" aria-hidden="true">
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
       </div>
 
       <div className="login-card">
         <form onSubmit={handleLogin}>
-          
-          <div className="input-group">
-            <label>USERNAME</label>
+          <div className="input-group field--email">
+            <label>COLLEGE EMAIL</label>
             <div className="input-wrapper">
-              <span className="input-icon">👤</span>
-              <input 
-                placeholder="College Email" 
-                type="email" 
-                onChange={(e) => setEmail(e.target.value)} 
-                required 
+              <input
+                placeholder="student@iiitsurat.ac.in"
+                type="email"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                required
               />
             </div>
           </div>
 
-          <div className="input-group">
+          <div className="input-group field--password">
             <div className="label-row">
               <label>PASSWORD</label>
-              <Link to="/forgot-password" className="forgot-link">Forgot?</Link>
+              <Link to="/forgot-password" className="forgot-link">
+                Forgot?
+              </Link>
             </div>
             <div className="input-wrapper">
-              <span className="input-icon">🔒</span>
-              <input 
-                placeholder="••••••••" 
-                type="password" 
-                onChange={(e) => setPassword(e.target.value)} 
-                required 
+              <input
+                placeholder="••••••••"
+                type="password"
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                required
               />
             </div>
           </div>
 
-          <button type="submit" className="login-btn">LOGIN</button>
+          <button type="submit" className="login-btn" disabled={loading}>
+            {loading ? "LOGGING IN..." : "LOGIN"}
+          </button>
+
           {error && <p className="auth-message auth-error">{error}</p>}
+          {error && error.includes("No account found") && (
+            <div className="signup-text">
+              <Link to="/signup">Create this account</Link>
+            </div>
+          )}
           {needsVerification && (
             <div className="signup-text">
               <Link to={`/verify-email?email=${encodeURIComponent(email)}`}>Verify email now</Link>
             </div>
           )}
-          {loading && 
-          <div id="loading-anim">
-            <BlinkBlur color="#0ea5e9" size="medium" text="" textColor="" />
-          </div>}
-
+          {loading && (
+            <div id="loading-anim">
+              <BlinkBlur color="#C6E86B" size="medium" text="" textColor="" />
+            </div>
+          )}
         </form>
 
         <div className="signup-text">

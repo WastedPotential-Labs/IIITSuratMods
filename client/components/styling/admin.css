@@ -1,0 +1,225 @@
+/* Admin dashboard — builds on the shared design tokens in index.css and the
+   base layout classes from venues.css. */
+
+.admin-flash {
+  border-radius: 14px;
+  font-size: 14px;
+  margin-bottom: 16px;
+  padding: 14px 16px;
+}
+
+.admin-flash--success {
+  background: #26311d;
+  border: 1px solid var(--lime);
+  color: #dce8b0;
+}
+
+.admin-flash--error {
+  background: #3d1f1b;
+  border: 1px solid var(--coral);
+  color: #f2b8ad;
+}
+
+/* Metric tiles — same recipe as the Profile info tiles.
+   The .admin-page prefix out-specifies venues.css's ".admin-metrics article"
+   default (dark background + border), which would otherwise win. */
+.admin-page .admin-metrics {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(4, 1fr);
+  margin-bottom: 28px;
+}
+
+.admin-page .metric-tile {
+  border: none;
+  border-radius: 14px;
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.metric-tile .metric-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  opacity: 0.65;
+  color: inherit;
+}
+
+.metric-tile strong {
+  color: inherit;
+  display: block;
+  font-size: 30px;
+  font-weight: 600;
+}
+
+.admin-page .metric-tile--lime {
+  background: var(--lime);
+  color: var(--lime-text);
+}
+
+.admin-page .metric-tile--teal {
+  background: var(--teal);
+  color: var(--teal-text);
+}
+
+.admin-page .metric-tile--purple {
+  background: var(--purple);
+  color: var(--purple-text);
+}
+
+.admin-page .metric-tile--gold {
+  background: var(--gold);
+  color: var(--gold-text);
+}
+
+/* Notification composer */
+.admin-page .admin-form {
+  border-top-color: var(--gold);
+}
+
+.admin-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 3px;
+}
+
+.admin-field--gold { color: var(--gold); }
+.admin-field--teal { color: var(--teal); }
+.admin-field--purple { color: var(--purple); }
+.admin-field--lime { color: var(--lime); }
+.admin-field--coral { color: var(--coral); }
+
+.admin-field input,
+.admin-field select,
+.admin-field textarea {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 400;
+  letter-spacing: normal;
+  min-height: 52px;
+  outline: none;
+  padding: 15px 18px;
+}
+
+.admin-field input:focus,
+.admin-field select:focus,
+.admin-field textarea:focus {
+  border-color: currentColor;
+}
+
+.admin-field select {
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+}
+
+.admin-field textarea {
+  min-height: 110px;
+  resize: vertical;
+}
+
+.admin-field-row {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: 1fr 1fr;
+}
+
+.admin-publish-btn {
+  background: var(--lime);
+  border: 0;
+  border-radius: 14px;
+  color: var(--lime-text);
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  min-height: 52px;
+  padding: 16px 32px;
+}
+
+.admin-publish-btn:hover:not(:disabled) {
+  background: var(--lime-hover);
+}
+
+.admin-publish-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Notification rows */
+.notification-row__top {
+  align-items: center;
+  display: flex;
+  flex-direction: row !important;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.status-chip,
+.audience-chip {
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  padding: 3px 8px;
+  white-space: nowrap;
+}
+
+.status-chip--live {
+  background: var(--lime);
+  color: var(--lime-text);
+}
+
+.status-chip--off {
+  background: var(--border);
+  color: var(--muted);
+}
+
+.audience-chip {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--teal);
+}
+
+.notification-row time {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.danger-btn {
+  background: var(--coral) !important;
+  color: var(--coral-text) !important;
+}
+
+.danger-btn:hover {
+  background: var(--coral-hover) !important;
+}
+
+.admin-page code {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--gold);
+  padding: 2px 8px;
+}
+
+@media (max-width: 1100px) {
+  .admin-page .admin-metrics {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 560px) {
+  .admin-page .admin-metrics,
+  .admin-field-row {
+    grid-template-columns: 1fr;
+  }
+}

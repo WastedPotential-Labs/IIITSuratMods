@@ -3,11 +3,9 @@
 
 
 import { useState } from "react";
-import axios from "axios";//http requests to backend
+import api from "../src/api";//http requests to backend
 import { Link, useNavigate } from "react-router-dom";
 import "./styling/Login.css";
-
-const API_URL = "http://localhost:5000/api/auth";
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
@@ -27,7 +25,7 @@ export default function ForgotPassword() {
     setError("");
 
     try {
-      const response = await axios.post(`${API_URL}/forgot-password`, { email });
+      const response = await api.post("/auth/forgot-password", { email });
       setCodeRequested(true);
       setMessage(response.data.message);
     } catch (err) {
@@ -49,7 +47,7 @@ export default function ForgotPassword() {
 
     setLoading(true);
     try {
-      const response = await axios.post(`${API_URL}/reset-password`, { email, otp, password });
+      const response = await api.post("/auth/reset-password", { email, otp, password });
       setMessage(response.data.message);
       setTimeout(() => navigate("/login"), 1200);
     } catch (err) {
@@ -62,13 +60,22 @@ export default function ForgotPassword() {
   return (
     <div className="portal-container">
       <div className="portal-header">
-        <h1>IIITSuratMods</h1>
+        <h1>
+          IIIT<span className="gold">Surat</span><span className="teal">Mods</span>
+        </h1>
         <p>Reset your password</p>
+        <div className="accent-bars" aria-hidden="true">
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
       </div>
 
       <div className="login-card">
         <form onSubmit={codeRequested ? changePassword : requestCode}>
-          <div className="input-group">
+          <div className="input-group field--email">
             <label>COLLEGE EMAIL</label>
             <div className="input-wrapper">
               <input
@@ -84,7 +91,7 @@ export default function ForgotPassword() {
 
           {codeRequested && (
             <>
-              <div className="input-group">
+              <div className="input-group field--code">
                 <label>6-DIGIT RESET CODE</label>
                 <div className="input-wrapper">
                   <input
@@ -99,14 +106,14 @@ export default function ForgotPassword() {
                 </div>
               </div>
 
-              <div className="input-group">
+              <div className="input-group field--password">
                 <label>NEW PASSWORD</label>
                 <div className="input-wrapper">
                   <input type="password" value={password} onChange={(event) => setPassword(event.target.value)} minLength="8" required />
                 </div>
               </div>
 
-              <div className="input-group">
+              <div className="input-group field--password">
                 <label>CONFIRM NEW PASSWORD</label>
                 <div className="input-wrapper">
                   <input type="password" value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} minLength="8" required />

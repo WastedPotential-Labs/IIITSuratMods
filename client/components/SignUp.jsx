@@ -2,7 +2,7 @@
 
 
 import { useState } from "react";
-import axios from "axios";
+import api from "../src/api";
 import "./styling/Login.css";
 import { useNavigate, Link } from "react-router-dom";
 import { BlinkBlur } from "react-loading-indicators";
@@ -10,8 +10,8 @@ export default function SignUp() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
-  const [batch, setBatch] = useState("CSE 1"); 
-  const [semester, setSemester] = useState("Semester 1"); 
+  const [batch, setBatch] = useState("CSE 1");
+  const [semester, setSemester] = useState("Semester 1");
 
   const nav = useNavigate();
   const [loading,setLoading] = useState(false);
@@ -22,7 +22,7 @@ export default function SignUp() {
     setError("");
     try {
       // Express register expects this exact shape in the request body.
-      // Full route: POST http://localhost:5000/api/auth/register
+      // Full route: POST {VITE_API_URL}/auth/register
       const newUserPayload = {
         name,
         email,
@@ -31,64 +31,72 @@ export default function SignUp() {
         password
       };
 
-      const response = await axios.post("http://localhost:5000/api/auth/register", newUserPayload);
-      
+      const response = await api.post("/auth/register", newUserPayload);
+
       if (response.status === 201) {
         nav(`/verify-email?email=${encodeURIComponent(response.data.email || email)}`);
       }
     } catch (err) {
-      setError(err.response?.data?.message || "Sign up failed. Please try again.");
+      const backendMessage = err.response?.data?.message;
+      const statusText = err.response?.status ? `HTTP ${err.response.status}` : err.code || err.message;
+      setError(backendMessage || `Sign up failed: ${statusText}`);
     } finally {
       setLoading(false);
     }
-    setLoading(false)
   };
 
   return (
     <div className="portal-container">
       <div className="portal-header">
-        <h1>IIITSuratMods</h1>
-        <p>IIIT Surat Portal</p>
+        <h1>
+          IIIT<span className="gold">Surat</span><span className="teal">Mods</span>
+        </h1>
+        <p>Create your student account</p>
+        <div className="accent-bars" aria-hidden="true">
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
       </div>
 
       <div className="login-card">
         <form onSubmit={handleSignup}>
-          
-          <div className="input-group">
+
+          <div className="input-group field--name">
             <label>NAME</label>
             <div className="input-wrapper">
-              <span className="input-icon">👤</span>
-              <input 
-                placeholder="Your Full Name" 
-                type="text" 
+              <input
+                placeholder="Your Full Name"
+                type="text"
                 value={name}
-                onChange={(e) => setName(e.target.value)} 
-                required 
+                onChange={(e) => setName(e.target.value)}
+                required
               />
             </div>
           </div>
 
-          <div className="input-group">
-            <label>EMAIL</label>
+          <div className="input-group field--email">
+            <label>COLLEGE EMAIL</label>
             <div className="input-wrapper">
-              <span className="input-icon">📧</span>
-              <input 
-                placeholder="College Email" 
-                type="email" 
+              <input
+                placeholder="student@iiitsurat.ac.in"
+                type="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)} 
-                required 
+                onChange={(e) => setEmail(e.target.value)}
+                required
               />
             </div>
           </div>
 
-          <div className="input-group">
+          <div className="input-group field--batch">
             <label>BATCH</label>
             <div className="input-wrapper">
-              <select 
-                value={batch} 
+              <select
+                value={batch}
                 onChange={(e) => setBatch(e.target.value)}
-                className="select-input" 
+                className="select-input"
                 required
               >
                 <option value="CSE 1">CSE 1</option>
@@ -99,11 +107,11 @@ export default function SignUp() {
             </div>
           </div>
 
-          <div className="input-group">
+          <div className="input-group field--semester">
             <label>SEMESTER</label>
             <div className="input-wrapper">
-              <select 
-                value={semester} 
+              <select
+                value={semester}
                 onChange={(e) => setSemester(e.target.value)}
                 className="select-input"
                 required
@@ -120,25 +128,27 @@ export default function SignUp() {
             </div>
           </div>
 
-          <div className="input-group">
+          <div className="input-group field--password">
             <label>SET PASSWORD</label>
             <div className="input-wrapper">
-              <span className="input-icon">🔒</span>
-              <input 
-                placeholder="••••••••" 
-                type="password" 
+              <input
+                placeholder="At least 8 characters"
+                type="password"
+                minLength="8"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)} 
-                required 
+                onChange={(e) => setPassword(e.target.value)}
+                required
               />
             </div>
           </div>
 
-          <button type="submit" className="login-btn">SignUp</button>
+          <button type="submit" className="login-btn" disabled={loading}>
+            {loading ? "CREATING ACCOUNT..." : "SIGN UP"}
+          </button>
           {error && <p className="auth-message auth-error">{error}</p>}
-          {loading && 
+          {loading &&
           <div id="loading-anim">
-            <BlinkBlur color="#0ea5e9" size="medium" text="" textColor="" />
+            <BlinkBlur color="#C6E86B" size="medium" text="" textColor="" />
           </div>}
         </form>
 

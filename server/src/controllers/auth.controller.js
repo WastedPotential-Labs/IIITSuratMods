@@ -125,6 +125,16 @@ export const register = async (req, res) => {
       email: user.email
     });
   } catch (error) {
+    // Duplicate email race: two signups for the same email at the same time.
+    if (error.code === 11000) {
+      return res.status(400).json({ message: "User already exists" });
+    }
+
+    if (error.name === "ValidationError") {
+      return res.status(400).json({ message: "Please check the signup details and try again" });
+    }
+
+    console.error("Registration failed:", error.message);
     res.status(503).json({ message: "Unable to send the verification email. Check the server email configuration." });
   }
 };
