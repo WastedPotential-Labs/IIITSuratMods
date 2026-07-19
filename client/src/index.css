@@ -5,3 +5,10 @@ body{
   font-family: Inter;
   color: white;
 }
+[data-sonner-toast] {
+  color: black !important;
+}
+
+[data-sonner-toast] * {
+  color: black !important;
+}

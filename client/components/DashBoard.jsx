@@ -2,11 +2,11 @@ import { useState, useEffect } from 'react';
 import dayjs from 'dayjs';
 import './styling/dashboard.css'
 import customParseFormat from 'dayjs/plugin/customParseFormat';
-import { weeklyTimetableMock } from '../MockData/WeeklyTimeTable';
 import profileIcon from './icons/profile.png'
 import pinIcon from './icons/pin.png'
+import axios from 'axios';
+import { BlinkBlur } from 'react-loading-indicators';
 dayjs.extend(customParseFormat);
-
 function mergeConsecutiveClasses(classes) {
   const merged = [];
 
@@ -50,12 +50,12 @@ function getTodaysClasses(timetable) {
       return { ...cls, startTime, endTime };
     })
     .filter(Boolean);
-   const newClasses = mergeConsecutiveClasses(classes);
-   return newClasses;
+  const newClasses = mergeConsecutiveClasses(classes);
+  return newClasses;
 }
 
 function getTomorrowClasses(timetable) {
-  const jsDay = dayjs().day()+1; // 0=Sun, 1=Mon, ..., 6=Sat
+  const jsDay = dayjs().day() + 1; // 0=Sun, 1=Mon, ..., 6=Sat
   if (jsDay === 0) return []; // no classes on sunday
 
   const dayIndex = jsDay - 1; // Monday=0
@@ -69,8 +69,8 @@ function getTomorrowClasses(timetable) {
       return { ...cls, startTime, endTime };
     })
     .filter(Boolean);
-   const newClasses = mergeConsecutiveClasses(classes);
-   return newClasses;
+  const newClasses = mergeConsecutiveClasses(classes);
+  return newClasses;
 }
 
 // for which class is live
@@ -88,7 +88,7 @@ function useClassStatuses(timetable) {
     const current = dayjs(now.format('hh:mm A'), 'hh:mm A');
 
     if (current.isAfter(start) && current.isBefore(end)) status = 'live';
-    else status='notLive';
+    else status = 'notLive';
 
     return { ...cls, status };
   });
@@ -104,11 +104,11 @@ function TodayClassCard({ data }) {
         {isLive && <span className="badge badge--live">HAPPENING NOW</span>}
       </div>
       <h3>{data.courseCode}</h3>
-        <hr/>
+      <hr />
       <p className="class-card__title">{data.courseName}</p>
       <div className="class-card__meta">
-        <span> <img src={profileIcon} className='class-card__icon'/>{data.facultyName}</span>
-        <span><img src={pinIcon} className='class-card__icon'/>{data.roomNo}</span>
+        <span> <img src={profileIcon} className='class-card__icon' />{data.facultyName}</span>
+        <span><img src={pinIcon} className='class-card__icon' />{data.roomNo}</span>
       </div>
     </div>
   );
@@ -116,40 +116,58 @@ function TodayClassCard({ data }) {
 
 // Main Dashboard component
 function Dashboard() {
+  const [weeklyTimetableMock, setWeeklyTimeTableMock] = useState([]);
+  useEffect(() => {
+    async function load() {
+      try {
+        const response = await axios.post("http://localhost:5000/api/timetable", {
+          "semester": 2,
+          "batch": "CSE 1"
+        });
+        console.log(response.data.slot)
+        setWeeklyTimeTableMock(response.data.slot);
+      } catch (err) {
+        console.log(err);
+      }
+    }
+    load();
+  }, []);
   const todaysClasses = getTodaysClasses(weeklyTimetableMock);
   const classesWithStatus = useClassStatuses(todaysClasses);
   const tomorrowClasses = getTomorrowClasses(weeklyTimetableMock);
   const classesWithStatus2 = useClassStatuses(tomorrowClasses);
   return (
     <>
-    <div className="dashboard">
-      <h1>Today's Schedule</h1>
-      <br/>
-      <h3 className=''>{dayjs().format('dddd, DD MMM YYYY')} - {todaysClasses.length} Classes Scheduled </h3><br/><br/>
+      {weeklyTimetableMock.length === 0  && <div className='load-bar'><BlinkBlur color="#0ea5e9" size="medium" text="" textColor="" /></div>}
+      {weeklyTimetableMock.length !== 0 && <>
+      <div className="dashboard">
+        <h1>Today's Schedule</h1>
+        <br />
+        <h3 className=''>{dayjs().format('dddd, DD MMM YYYY')} - {todaysClasses.length} Classes Scheduled </h3><br /><br />
 
-      {todaysClasses.length === 0 ? 
-        (<p>No classes today 🎉</p>)
-        :(<div className="today-schedule-row">
-          {classesWithStatus.map((cls) => (
-            <TodayClassCard data={cls} />
-          ))}
-        </div>)}
-    </div>
-    <br></br>
-    <br></br>
-    <div className="dashboard">
-      <h1>Tomorrow's Schedule</h1>
-      <br/>
-      <h3 className=''> {tomorrowClasses.length} Classes Scheduled </h3><br/><br/>
+        {todaysClasses.length === 0 ?
+          (<p>No classes today 🎉</p>)
+          : (<div className="today-schedule-row">
+            {classesWithStatus.map((cls) => (
+              <TodayClassCard data={cls} />
+            ))}
+          </div>)}
+      </div>
+      <br></br>
+      <br></br>
+      <div className="dashboard">
+        <h1>Tomorrow's Schedule</h1>
+        <br />
+        <h3 className=''> {tomorrowClasses.length} Classes Scheduled </h3><br /><br />
 
-      {tomorrowClasses.length === 0 ? 
-        (<p>No classes Tomorrow 🎉</p>)
-        :(<div className="today-schedule-row">
-          {tomorrowClasses.map((cls) => (
-            <TodayClassCard data={cls} />
-          ))}
-        </div>)}
-    </div>
+        {tomorrowClasses.length === 0 ?
+          (<p>No classes Tomorrow 🎉</p>)
+          : (<div className="today-schedule-row">
+            {tomorrowClasses.map((cls) => (
+              <TodayClassCard data={cls} />
+            ))}
+          </div>)}
+      </div></>}
     </>
   );
 }

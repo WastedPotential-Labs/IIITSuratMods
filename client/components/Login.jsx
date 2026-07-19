@@ -6,20 +6,20 @@ import axios from "axios";
 import { useAuth } from "../context/Auth";
 import "./styling/Login.css";
 import { useNavigate, Link } from "react-router-dom";
-import {BlinkBlur}  from 'react-loading-indicators';
-
+import { BlinkBlur } from 'react-loading-indicators';
+import { toast } from "sonner";
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { user,setUser } = useAuth();
+  const { user, setUser } = useAuth();
   const nav = useNavigate();
-  useEffect(()=>{
+  useEffect(() => {
     const savedProfile = localStorage.getItem("userProfile");
-    if(user || savedProfile){
+    if (user || savedProfile) {
       nav("/dashboard")
     }
-  },[user])
-  const [loading,setLoading] = useState(false);
+  }, [user])
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [needsVerification, setNeedsVerification] = useState(false);
   const handleLogin = async (e) => {
@@ -34,12 +34,21 @@ export default function Login() {
         email,
         password
       });
-      
+
       // Backend returns an object like: { message, user, token }
       // So we read response.data.token and response.data.user directly.
       if (response.data?.token && response.data?.user) {
         localStorage.setItem("userToken", response.data.token);
         localStorage.setItem("userProfile", JSON.stringify(response.data.user));
+        toast.success("Logged In",
+        {
+          position: "top-center",
+          style: {
+            color: "black",
+            background: "white",
+          }
+        }
+      )
         setUser(response.data.user);
         nav("/dashboard");
       } else {
@@ -48,8 +57,18 @@ export default function Login() {
     } catch (err) {
       setError(err.response?.data?.message || "Login failed. Please try again.");
       setNeedsVerification(Boolean(err.response?.data?.emailVerificationRequired));
+      const message = err.response?.data?.message;
+      toast.warning(message,
+        {
+          position: "top-center",
+          style: {
+            color: "black",
+            background: "white",
+          }
+        }
+      )
     }
-    setLoading(false)
+    setLoading(false);
   };
 
   return (
@@ -61,16 +80,16 @@ export default function Login() {
 
       <div className="login-card">
         <form onSubmit={handleLogin}>
-          
+
           <div className="input-group">
             <label>USERNAME</label>
             <div className="input-wrapper">
               <span className="input-icon">👤</span>
-              <input 
-                placeholder="College Email" 
-                type="email" 
-                onChange={(e) => setEmail(e.target.value)} 
-                required 
+              <input
+                placeholder="College Email"
+                type="email"
+                onChange={(e) => setEmail(e.target.value)}
+                required
               />
             </div>
           </div>
@@ -82,26 +101,26 @@ export default function Login() {
             </div>
             <div className="input-wrapper">
               <span className="input-icon">🔒</span>
-              <input 
-                placeholder="••••••••" 
-                type="password" 
-                onChange={(e) => setPassword(e.target.value)} 
-                required 
+              <input
+                placeholder="••••••••"
+                type="password"
+                onChange={(e) => setPassword(e.target.value)}
+                required
               />
             </div>
           </div>
 
           <button type="submit" className="login-btn">LOGIN</button>
-          {error && <p className="auth-message auth-error">{error}</p>}
+          {error && <p className="auth-message auth-error" style={{ textAlign: "center" }}>{error}</p>}
           {needsVerification && (
             <div className="signup-text">
               <Link to={`/verify-email?email=${encodeURIComponent(email)}`}>Verify email now</Link>
             </div>
           )}
-          {loading && 
-          <div id="loading-anim">
-            <BlinkBlur color="#0ea5e9" size="medium" text="" textColor="" />
-          </div>}
+          {loading &&
+            <div id="loading-anim">
+              <BlinkBlur color="#0ea5e9" size="medium" text="" textColor="" />
+            </div>}
 
         </form>
 

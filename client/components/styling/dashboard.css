@@ -79,3 +79,9 @@
 .dashboard{
   padding: 30px;
 }
+.load-bar{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}

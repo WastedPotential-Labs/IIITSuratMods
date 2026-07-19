@@ -3,7 +3,7 @@ import axios from "axios";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../context/Auth";
 import "./styling/Login.css";
-
+import { toast } from "sonner";
 const API_URL = "http://localhost:5000/api/auth";
 
 export default function VerifyEmail() {
@@ -27,9 +27,20 @@ export default function VerifyEmail() {
       localStorage.setItem("userToken", response.data.token);
       localStorage.setItem("userProfile", JSON.stringify(response.data.user));
       setUser(response.data.user);
+      toast.success("Account Successfully Created");
       navigate("/dashboard");
     } catch (err) {
       setError(err.response?.data?.message || "Could not verify the code. Try again.");
+      const message = err.response?.data?.message || "Could not verify the code. Try again.";
+      toast.warning(message,
+        {
+          position: "top-center",
+          style: {
+            color: "black",
+            background: "white",
+          }
+        }
+      )
     } finally {
       setLoading(false);
     }

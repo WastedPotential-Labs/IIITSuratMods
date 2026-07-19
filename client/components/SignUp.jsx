@@ -6,6 +6,7 @@ import axios from "axios";
 import "./styling/Login.css";
 import { useNavigate, Link } from "react-router-dom";
 import { BlinkBlur } from "react-loading-indicators";
+import { toast } from "sonner";
 export default function SignUp() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -34,6 +35,7 @@ export default function SignUp() {
       const response = await axios.post("http://localhost:5000/api/auth/register", newUserPayload);
       
       if (response.status === 201) {
+        toast.info("Please Verify Your Email");
         nav(`/verify-email?email=${encodeURIComponent(response.data.email || email)}`);
       }
     } catch (err) {
