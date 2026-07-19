@@ -6,7 +6,7 @@ import { useState } from "react";
 import axios from "axios";//http requests to backend
 import { Link, useNavigate } from "react-router-dom";
 import "./styling/Login.css";
-
+import { toast } from "sonner"
 const API_URL = "http://localhost:5000/api/auth";
 
 export default function ForgotPassword() {
