@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "../context/Auth";
 import { parseCurriculum } from "../src/curriculumParser";
+import api from "../src/api";
 import "./styling/academics.css";
 
 const branchByBatch = {
@@ -59,8 +60,38 @@ const lineLooksLikeCourse = (line) =>
 
 const SUBJECT_HEADER_RE = /^([A-Z]{2,4}\s?-?\s?\d{3,4}[A-Z]?)\s*:\s*(.+?)(?:\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+))?$/;
 const UNIT_RE = /^(?:Unit\s*[–-]?\s*\d+\s*:?\s*)?(.+?)\s+(\d+)\s+Hours?$/i;
+const UNIT_WITH_DETAILS_RE = /^(?:Unit\s*[\u2013-]?\s*(\d+)\s*:?\s*)?(.+?)\s+(\d+)\s+Hours?\s+(.+)$/i;
 const BOOK_SECTION_RE = /^(Recommended Books|Reference Books|Text-?Books?|Text Books?)$/i;
 const CONTACT_RE = /^Total Contact (?:Time|Hours).*?:?\s*(\d+)\s+Hours?$/i;
+
+const normalizeSyllabusLine = (line) =>
+  String(line || "")
+    .replace(/[\u2010-\u2015]/g, "-")
+    .replace(/\s+/g, " ")
+    .trim();
+
+const expandSyllabusLines = (lines) =>
+  lines.flatMap((rawLine) => {
+    let line = normalizeSyllabusLine(rawLine);
+    if (!line) return [];
+
+    line = line.replace(/^B\.?\s?TECH\.?(?:-[IVX]+|\.?\s?[IVX]+)?[,]?\s*Semester[-\s]*[IVX0-9]+\s+L\s+T\s+P\s+C\s+/i, "");
+    line = line.replace(/\s+(?=B\.?\s?Tech(?:\.|-|,|\s))/gi, "\n");
+    line = line.replace(/\s+(?=[A-Z]{2,4}\s?-?\s?\d{3,4}[A-Z]?\s*:)/g, "\n");
+    line = line.replace(
+      /^([A-Z]{2,4}\s?-?\s?\d{3,4}[A-Z]?\s*:\s*.+?\s+\d+\s+\d+\s+\d+\s+\d+)\s+(.+)$/i,
+      "$1\n$2"
+    );
+    line = line.replace(/\s+(?=Unit\s*-?\s*\d+\s*:?\s+\d+\s+Hours?)/gi, "\n");
+    line = line.replace(/\s+(?=[A-Z][A-Z &-]+:?\s+\d+\s+Hours?)/g, "\n");
+    line = line.replace(/\s+(?=Total Contact (?:Time|Hours))/gi, "\n");
+    line = line.replace(/\s+(?=Recommended Books:?|Reference Books:?|Text-?Books?:?)/gi, "\n");
+
+    return line
+      .split("\n")
+      .map(normalizeSyllabusLine)
+      .filter(Boolean);
+  });
 
 const parseSubjectSyllabus = (lines) => {
   const subjects = [];
@@ -85,8 +116,7 @@ const parseSubjectSyllabus = (lines) => {
     lastUnit.details = `${lastUnit.details} ${text}`.trim();
   };
 
-  lines.forEach((rawLine) => {
-    const line = String(rawLine || "").replace(/\s+/g, " ").trim();
+  expandSyllabusLines(lines).forEach((line) => {
     if (!line) return;
     if (/^B\.?\s?Tech/i.test(line) && !SUBJECT_HEADER_RE.test(line)) return;
 
@@ -127,6 +157,18 @@ const parseSubjectSyllabus = (lines) => {
     const unit = line.match(UNIT_RE);
     if (unit) {
       ensureCurrent().units.push({ title: unit[1].trim(), hours: unit[2], details: "" });
+      activeBookSection = "";
+      return;
+    }
+
+    const unitWithDetails = line.match(UNIT_WITH_DETAILS_RE);
+    if (unitWithDetails) {
+      const [, unitNumber, title, hours, details] = unitWithDetails;
+      ensureCurrent().units.push({
+        title: title.trim() || `Unit ${unitNumber}`,
+        hours,
+        details: details.trim()
+      });
       activeBookSection = "";
       return;
     }
@@ -297,26 +339,16 @@ function BulletBlock({ title, item, textEntry }) {
 export default function Academics() {
   const { user } = useAuth();
   const [items, setItems] = useState([]);
-  const [textItems, setTextItems] = useState({});
   const [status, setStatus] = useState("Loading syllabus...");
 
   useEffect(() => {
-    Promise.all([
-      fetch("/syllabusData.json").then((response) => {
-        if (!response.ok) throw new Error("Unable to load syllabus metadata");
-        return response.json();
-      }),
-      fetch("/syllabusText.json").then((response) => {
-        if (!response.ok) throw new Error("Unable to load extracted syllabus text");
-        return response.json();
-      })
-    ])
-      .then(([metadata, extractedText]) => {
-        setItems(metadata.items || []);
-        setTextItems(extractedText.items || {});
+    api
+      .get("/syllabus")
+      .then((response) => {
+        setItems(response.data.items || []);
         setStatus("");
       })
-      .catch((error) => setStatus(error.message));
+      .catch((error) => setStatus(error.response?.data?.message || "Unable to load syllabus data from the database."));
   }, []);
 
   const profileSelection = useMemo(() => {
@@ -373,7 +405,7 @@ export default function Academics() {
           <BulletBlock
             title={`${profileSelection.curriculum.branchName} Curriculum`}
             item={profileSelection.curriculum}
-            textEntry={textItems[String(profileSelection.curriculum.id)]}
+            textEntry={{ bullets: profileSelection.curriculum.bullets || [] }}
           />
         ) : (
           <p className="academics-empty">No curriculum found for your profile branch.</p>
@@ -386,7 +418,7 @@ export default function Academics() {
           <BulletBlock
             title={profileSelection.semesterSyllabus.semester}
             item={profileSelection.semesterSyllabus}
-            textEntry={textItems[String(profileSelection.semesterSyllabus.id)]}
+            textEntry={{ bullets: profileSelection.semesterSyllabus.bullets || [] }}
           />
         ) : (
           <p className="academics-empty">

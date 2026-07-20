@@ -1,4 +1,5 @@
 import TimetableSlot from "../models/TimetableSlot.js";
+import ClassSchedule from "../models/ClassSchedule.js";
 import { parseTimeToMinutes } from "../utils/time.js";
 
 const dayNames = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
@@ -15,6 +16,41 @@ const slotFields = ["dayOfWeek", "startTime", "endTime", "courseCode", "courseNa
 
 const pickSlotFields = (body) =>
   Object.fromEntries(slotFields.filter((field) => body[field] !== undefined).map((field) => [field, body[field]]));
+
+const importedFilterForUser = (user, extra = {}) => ({
+  batch: user.batch,
+  semester: user.semester,
+  isCancelled: false,
+  ...extra
+});
+
+const importedSort = { dayOfWeek: 1, startMinutes: 1, endMinutes: 1 };
+
+export const getImportedTodayTimetable = async (req, res) => {
+  try {
+    const day = dayNames[new Date().getDay()];
+    const classes = await ClassSchedule.find(importedFilterForUser(req.user, { dayOfWeek: day }))
+      .sort({ startMinutes: 1, endMinutes: 1 })
+      .lean();
+
+    return res.json({ day, classes });
+  } catch (error) {
+    return res.status(500).json({ message: "Unable to load today's imported timetable" });
+  }
+};
+
+export const getImportedWeeklyTimetable = async (req, res) => {
+  try {
+    const slots = await ClassSchedule.find(importedFilterForUser(req.user)).sort(importedSort).lean();
+    return res.json({
+      batch: req.user.batch,
+      semester: req.user.semester,
+      slots
+    });
+  } catch (error) {
+    return res.status(500).json({ message: "Unable to load imported weekly timetable" });
+  }
+};
 
 export const getTodayTimetable = async (req, res) => {
   try {

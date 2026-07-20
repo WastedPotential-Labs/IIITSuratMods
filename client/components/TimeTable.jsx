@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import './styling/timetable.css'
 import { weeklyTimetableMock } from '../MockData/WeeklyTimeTable';
 import { useAuth } from '../context/Auth';
+import api from '../src/api';
 
 const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const dayKeys = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
@@ -71,32 +72,35 @@ const buildRowsFromSchedules = (schedules) => {
 
 export default function TimeTable(props) {
   const { user } = useAuth();
-  const [seedSchedules, setSeedSchedules] = useState([]);
+  const [importedSchedules, setImportedSchedules] = useState([]);
+  const [loaded, setLoaded] = useState(false);
   const [loadError, setLoadError] = useState("");
 
   useEffect(() => {
-    fetch("/timetableSeed.json")
+    if (!user) {
+      setImportedSchedules([]);
+      setLoaded(true);
+      setLoadError("");
+      return;
+    }
+
+    setLoaded(false);
+    api
+      .get("/timetable/imported/weekly")
       .then((response) => {
-        if (!response.ok) throw new Error("Timetable seed not found");
-        return response.json();
-      })
-      .then((seed) => {
-        setSeedSchedules(seed.schedules || []);
+        setImportedSchedules(response.data.slots || []);
         setLoadError("");
       })
       .catch(() => {
-        setSeedSchedules([]);
-        setLoadError("Unable to load imported timetable data.");
+        setImportedSchedules([]);
+        setLoadError("Unable to load timetable data from the database.");
+      })
+      .finally(() => {
+        setLoaded(true);
       });
-  }, []);
+  }, [user]);
 
-  const profileSchedules = useMemo(() => {
-    if (!user?.batch || !user?.semester) return [];
-
-    return seedSchedules.filter((slot) => slot.batch === user.batch && slot.semester === user.semester && !slot.isCancelled);
-  }, [seedSchedules, user?.batch, user?.semester]);
-
-  const data = profileSchedules.length ? buildRowsFromSchedules(profileSchedules) : !user ? weeklyTimetableMock : [];
+  const data = importedSchedules.length ? buildRowsFromSchedules(importedSchedules) : !user ? weeklyTimetableMock : [];
   const subjectMap = getSubjectMap(data);
   const section = user ? `${user.batch} · ${user.semester}` : "Sample CSE timetable";
 
@@ -110,8 +114,8 @@ export default function TimeTable(props) {
       </header>
 
       {user && loadError && <p className="schedule-empty">{loadError}</p>}
-      {user && !loadError && seedSchedules.length > 0 && data.length === 0 && (
-        <p className="schedule-empty">No imported timetable is available for {user.batch} {user.semester} yet.</p>
+      {user && !loadError && loaded && data.length === 0 && (
+        <p className="schedule-empty">No timetable is available in the database for {user.batch} {user.semester} yet.</p>
       )}
 
       {data.length > 0 && (

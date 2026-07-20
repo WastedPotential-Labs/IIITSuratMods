@@ -8,57 +8,6 @@ const getDefaultDay = () => {
   return days.includes(currentDay) ? currentDay : "monday";
 };
 
-const toMinutes = (time) => {
-  const [hours, minutes] = String(time).split(":").map(Number);
-  return hours * 60 + minutes;
-};
-
-const formatMinutes = (minutes) => `${String(Math.floor(minutes / 60)).padStart(2, "0")}:${String(minutes % 60).padStart(2, "0")}`;
-
-const overlaps = (aStart, aEnd, bStart, bEnd) => aStart < bEnd && bStart < aEnd;
-
-const loadLocalSeed = async () => {
-  const response = await fetch("/timetableSeed.json");
-  if (!response.ok) throw new Error("Local timetable seed not found");
-  return response.json();
-};
-
-const localVenueSearch = (seed, query) => {
-  const normalizedQuery = query.trim().toLowerCase();
-  const venues = seed.venues || [];
-  if (!normalizedQuery) return venues;
-
-  return venues.filter((venue) =>
-    [venue.name, venue.type, venue.building, venue.notes].filter(Boolean).join(" ").toLowerCase().includes(normalizedQuery)
-  );
-};
-
-const localVenueSchedules = (seed, venueName) =>
-  (seed.schedules || [])
-    .filter((slot) => slot.roomNo === venueName && !slot.isCancelled)
-    .map((slot, index) => ({ ...slot, _id: `${slot.source}-${slot.dayOfWeek}-${slot.startTime}-${index}` }))
-    .sort((a, b) => days.indexOf(a.dayOfWeek) - days.indexOf(b.dayOfWeek) || a.startMinutes - b.startMinutes);
-
-const localFreeRooms = (seed, params) => {
-  const start = toMinutes(params.time);
-  const duration = Number(params.duration);
-  const end = start + duration;
-  const busyRooms = new Set(
-    (seed.schedules || [])
-      .filter(
-        (slot) =>
-          slot.dayOfWeek === params.day &&
-          !slot.isCancelled &&
-          overlaps(slot.startMinutes, slot.endMinutes, start, end)
-      )
-      .map((slot) => slot.roomNo)
-  );
-
-  return (seed.venues || [])
-    .filter((venue) => !busyRooms.has(venue.name))
-    .map((venue) => ({ ...venue, freeFrom: formatMinutes(start), freeUntil: formatMinutes(end) }));
-};
-
 function ScheduleList({ schedules, day }) {
   if (!schedules.length) return <p className="muted">No scheduled classes found for this venue on {day}.</p>;
 
@@ -110,7 +59,6 @@ export default function Venues() {
   const [freeRooms, setFreeRooms] = useState([]);
   const [hasSearchedRooms, setHasSearchedRooms] = useState(false);
   const [message, setMessage] = useState("");
-  const [localSeed, setLocalSeed] = useState(null);
 
   const filteredFreeRooms = useMemo(
     () => freeRooms.filter((room) => room.name.toLowerCase().includes(query.toLowerCase())),
@@ -134,19 +82,13 @@ export default function Venues() {
           setMessage("");
         })
         .catch(async () => {
-          try {
-            const seed = localSeed || (await loadLocalSeed());
-            setLocalSeed(seed);
-            setVenues(localVenueSearch(seed, query));
-            setMessage("Using local timetable data because the backend API is not running.");
-          } catch (error) {
-            setMessage("Unable to load venues from the API or local timetable seed.");
-          }
+          setVenues([]);
+          setMessage("Unable to load venues from the database.");
         });
     }, 200);
 
     return () => clearTimeout(handle);
-  }, [query, localSeed]);
+  }, [query]);
 
   const openVenue = async (venue) => {
     setSelected(venue);
@@ -156,15 +98,8 @@ export default function Venues() {
       setSelected(response.data.venue);
       setSelectedSchedules(response.data.schedules || []);
     } catch (error) {
-      try {
-        const seed = localSeed || (await loadLocalSeed());
-        setLocalSeed(seed);
-        setSelected(venue);
-        setSelectedSchedules(localVenueSchedules(seed, venue.name));
-        setMessage("Using local timetable data because the backend API is not running.");
-      } catch {
-        setMessage("Unable to load venue schedule from the API or local timetable seed.");
-      }
+      setSelectedSchedules([]);
+      setMessage("Unable to load venue schedule from the database.");
     }
   };
 
@@ -176,14 +111,8 @@ export default function Venues() {
       const response = await api.get("/venues/free", { params: freeParams });
       setFreeRooms(response.data.rooms || []);
     } catch (error) {
-      try {
-        const seed = localSeed || (await loadLocalSeed());
-        setLocalSeed(seed);
-        setFreeRooms(localFreeRooms(seed, freeParams));
-        setMessage("Using local timetable data because the backend API is not running.");
-      } catch {
-        setMessage(error.response?.data?.message || "Unable to find free rooms from the API or local timetable seed.");
-      }
+      setFreeRooms([]);
+      setMessage(error.response?.data?.message || "Unable to find free rooms from the database.");
     }
   };
 

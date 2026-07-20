@@ -3,7 +3,7 @@
   color: #f5f1ec;
   font-family: Poppins, Inter, sans-serif;
   min-height: 100%;
-  padding: 48px 56px;
+  padding: 96px 56px 48px 112px;
 }
 
 .venue-header {
@@ -452,7 +452,7 @@
 
 @media (max-width: 800px) {
   .venue-page {
-    padding: 32px 20px;
+    padding: 112px 20px 32px 96px;
   }
 
   .venue-header {

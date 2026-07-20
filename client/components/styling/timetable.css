@@ -29,7 +29,7 @@
   font-family: Poppins, Inter, sans-serif;
   min-height: 100%;
   overflow-x: hidden;
-  padding: 40px;
+  padding: 96px 40px 40px 96px;
 }
 
 .schedule-hero {
@@ -85,9 +85,9 @@
 }
 
 .schedule-layout {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 32px;
-  grid-template-columns: minmax(820px, 1fr) var(--sidebar-w);
 }
 
 .schedule-empty {
@@ -104,18 +104,19 @@
   min-width: 0;
   overflow-x: auto;
   padding-bottom: 10px;
+  width: 100%;
 }
 
 .schedule-row-grid,
 .schedule-grid--days {
   display: grid;
   gap: var(--grid-gap);
-  grid-template-columns: var(--time-col) repeat(var(--day-count), minmax(134px, 1fr));
+  grid-template-columns: var(--time-col) repeat(var(--day-count), minmax(150px, 1fr));
 }
 
 .schedule-grid--days {
   margin-bottom: 20px;
-  min-width: 920px;
+  min-width: 1040px;
 }
 
 .schedule-rows {
@@ -124,7 +125,7 @@
 
 .schedule-row-grid {
   margin-bottom: var(--grid-gap);
-  min-width: 920px;
+  min-width: 1040px;
 }
 
 .day-heading {
@@ -234,13 +235,13 @@
   letter-spacing: 0;
   margin-bottom: var(--grid-gap);
   min-height: 76px;
-  min-width: 920px;
+  min-width: 1040px;
 }
 
 .schedule-sidebar {
-  display: flex;
-  flex-direction: column;
+  display: grid;
   gap: 28px;
+  grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.65fr);
 }
 
 .sidebar-panel,
@@ -263,6 +264,7 @@
 
 .legend-list {
   display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 18px;
 }
 
@@ -306,19 +308,14 @@
 }
 
 @media (max-width: 1180px) {
-  .schedule-layout {
-    grid-template-columns: 1fr;
-  }
-
   .schedule-sidebar {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(260px, 0.65fr);
+    grid-template-columns: 1fr;
   }
 }
 
 @media (max-width: 760px) {
   .schedule-page {
-    padding: 24px 16px;
+    padding: 112px 16px 24px 96px;
   }
 
   .schedule-hero {

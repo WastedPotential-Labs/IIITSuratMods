@@ -9,6 +9,7 @@ import timetableRoutes from "./routes/timetable.routes.js";
 import venueRoutes from "./routes/venue.routes.js";
 import notificationRoutes from "./routes/notification.routes.js";
 import adminRoutes from "./routes/admin.routes.js";
+import syllabusRoutes from "./routes/syllabus.routes.js";
 
 const app = express();//creates a web server API
 //Middleware is code that runs during a request before the final route handler.
@@ -41,6 +42,7 @@ app.use("/api/timetable", timetableRoutes);
 app.use("/api/venues", venueRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/syllabus", syllabusRoutes);
 
 app.use((req, res) => {
   res.status(404).json({ message: "Route not found" });

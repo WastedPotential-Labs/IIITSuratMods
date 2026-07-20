@@ -208,6 +208,7 @@ main {
 .academics-page,
 .profile-page,
 .schedule-page {
+  padding-left: 96px;
   padding-top: 96px;
 }
 
@@ -227,6 +228,7 @@ main {
   .academics-page,
   .profile-page,
   .schedule-page {
+    padding-left: 96px;
     padding-top: 112px;
   }
 

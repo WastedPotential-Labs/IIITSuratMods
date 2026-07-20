@@ -10,6 +10,7 @@
     "extract:timetables": "python scripts/extractTimetablePdfs.py",
     "extract:syllabus-text": "python scripts/extractSyllabusText.py",
     "seed:timetables": "node scripts/seedTimetableData.js",
+    "seed:syllabus": "node scripts/seedSyllabusData.js",
     "make:admin": "node scripts/makeAdmin.js"
   },
   "dependencies": {

@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import dayjs from 'dayjs';
 import './styling/dashboard.css'
 import customParseFormat from 'dayjs/plugin/customParseFormat';
@@ -132,24 +132,21 @@ function DashboardNotifications() {
 // Main Dashboard component
 function Dashboard() {
   const { user } = useAuth();
-  const [seedSchedules, setSeedSchedules] = useState([]);
+  const [todaysImportedClasses, setTodaysImportedClasses] = useState([]);
 
   useEffect(() => {
-    fetch("/timetableSeed.json")
-      .then((response) => {
-        if (!response.ok) throw new Error("Timetable seed not found");
-        return response.json();
-      })
-      .then((seed) => setSeedSchedules(seed.schedules || []))
-      .catch(() => setSeedSchedules([]));
-  }, []);
+    if (!user) {
+      setTodaysImportedClasses([]);
+      return;
+    }
 
-  const profileSchedules = useMemo(() => {
-    if (!user?.batch || !user?.semester) return [];
-    return seedSchedules.filter((slot) => slot.batch === user.batch && slot.semester === user.semester && !slot.isCancelled);
-  }, [seedSchedules, user?.batch, user?.semester]);
+    api
+      .get("/timetable/imported/today")
+      .then((response) => setTodaysImportedClasses(response.data.classes || []))
+      .catch(() => setTodaysImportedClasses([]));
+  }, [user]);
 
-  const todaysClasses = user ? getTodaysClassesFromSchedules(profileSchedules) : getTodaysClasses(weeklyTimetableMock);
+  const todaysClasses = user ? getTodaysClassesFromSchedules(todaysImportedClasses) : getTodaysClasses(weeklyTimetableMock);
   const classesWithStatus = useClassStatuses(todaysClasses);
 
   return (
