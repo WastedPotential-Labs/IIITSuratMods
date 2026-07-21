@@ -5,6 +5,7 @@
   border-radius: 14px;
   font-size: 14px;
   margin-bottom: 16px;
+  overflow-wrap: break-word;
   padding: 14px 16px;
 }
 
@@ -26,13 +27,14 @@
 .admin-page .admin-metrics {
   display: grid;
   gap: 14px;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   margin-bottom: 28px;
 }
 
 .admin-page .metric-tile {
   border: none;
   border-radius: 14px;
+  min-width: 0;
   padding: 18px 20px;
   display: flex;
   flex-direction: column;
@@ -52,12 +54,14 @@
   display: block;
   font-size: 30px;
   font-weight: 600;
+  overflow-wrap: break-word;
 }
 
 .admin-page .admin-split {
   align-items: start;
   gap: 24px;
-  grid-template-columns: minmax(320px, 0.95fr) minmax(320px, 1.05fr);
+  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+  min-width: 0;
 }
 .admin-page .metric-tile--lime {
   background: var(--lime);
@@ -83,6 +87,7 @@
 .admin-page .admin-form {
   border-top-color: var(--gold);
   margin-bottom: 0;
+  min-width: 0;
   width: 100%;
 }
 
@@ -113,9 +118,21 @@
   font-size: 15px;
   font-weight: 400;
   letter-spacing: normal;
+  max-width: 100%;
   min-height: 52px;
+  min-width: 0;
   outline: none;
   padding: 15px 18px;
+  width: 100%;
+}
+
+/* type="time" / type="datetime-local" / type="number" have an intrinsic
+   content width in most browsers that ignores width:100% unless the grid
+   track is explicitly allowed to shrink — same fix as venues.css inputs */
+.admin-field input[type="time"],
+.admin-field input[type="datetime-local"],
+.admin-field input[type="number"] {
+  min-width: 0;
   width: 100%;
 }
 
@@ -140,6 +157,7 @@
   display: grid;
   gap: 14px;
   grid-template-columns: repeat(2, minmax(0, 1fr));
+  min-width: 0;
 }
 
 .admin-publish-btn {
@@ -151,6 +169,7 @@
   font-size: 15px;
   font-weight: 600;
   letter-spacing: 2px;
+  max-width: 100%;
   min-height: 52px;
   padding: 16px 32px;
 }
@@ -171,6 +190,7 @@
   color: var(--muted);
   font-size: 14px;
   margin: 0;
+  overflow-wrap: break-word;
   padding: 14px 16px;
 }
 
@@ -248,7 +268,33 @@
   border: 1px solid var(--border);
   border-radius: 6px;
   color: var(--gold);
+  overflow-wrap: anywhere;
   padding: 2px 8px;
+}
+
+/* Schedule editor grid (used inline in .admin-row when editing a slot) —
+   the original 120px-minimum tracks couldn't shrink below 3x120px+gaps,
+   which overflowed anything narrower than ~400px. */
+.schedule-editor {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+/* Fixed 1fr/150px split on .admin-row (venues.css) is fine on desktop but
+   too tight on phones once real content (long notification text, action
+   buttons) is in the 150px column — stack it below 640px instead. */
+@media (max-width: 640px) {
+  .admin-page .admin-row {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-page .row-actions {
+    grid-auto-flow: column;
+    justify-content: start;
+  }
+
+  .schedule-editor {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 1180px) {
@@ -257,7 +303,7 @@
   }
 
   .admin-page .admin-metrics {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 

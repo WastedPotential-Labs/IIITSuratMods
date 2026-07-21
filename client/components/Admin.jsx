@@ -437,13 +437,17 @@ export default function Admin() {
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
-          zIndex: 1000
+          zIndex: 1000,
+          padding: "16px",
+          boxSizing: "border-box"
         }}>
           <div style={{
             background: "#1e1e24",
             padding: "1.5rem",
             borderRadius: "8px",
-            width: "320px",
+            width: "100%",
+            maxWidth: "320px",
+            boxSizing: "border-box",
             border: "1px solid #333"
           }}>
             <h3 style={{ marginTop: 0, color: "#fff" }}>Add New Branch / Batch</h3>
@@ -462,7 +466,7 @@ export default function Admin() {
                 autoFocus
                 required
               />
-              <div style={{ display: "flex", gap: "0.5rem", justifyContent: "flex-end" }}>
+              <div style={{ display: "flex", gap: "0.5rem", justifyContent: "flex-end", flexWrap: "wrap" }}>
                 <button
                   type="button"
                   onClick={() => setShowAddBranchModal(false)}
@@ -697,6 +701,8 @@ export default function Admin() {
             justifyContent: "space-between",
             alignItems: "center",
             marginBottom: "1rem",
+            flexWrap: "wrap",
+            gap: "0.75rem",
           }}
         >
           <h2>Timetable data</h2>

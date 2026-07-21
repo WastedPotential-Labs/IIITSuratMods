@@ -47,6 +47,7 @@
   align-items: center;
   display: flex;
   gap: 14px;
+  min-width: 0;
 }
 
 .search-input,
@@ -58,16 +59,20 @@
   background: #221e1b;
   border: 1px solid #35302b;
   border-radius: 14px;
+  box-sizing: border-box;
   color: #f5f1ec;
   font-family: inherit;
   font-size: 15px;
+  max-width: 100%;
   min-height: 52px;
+  min-width: 0;
   outline: none;
   padding: 15px 20px;
+  width: 100%;
 }
 
 .search-input {
-  width: 320px;
+  max-width: 320px;
 }
 
 .search-input::placeholder {
@@ -99,6 +104,7 @@
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 3px;
+  min-width: 0;
 }
 
 .field--day {
@@ -118,6 +124,16 @@
   cursor: pointer;
 }
 
+/* type="time" / type="number" ignore width:100% in some browsers until
+   the grid track itself is told it's allowed to shrink below its
+   content's intrinsic width — this is what actually caused the overflow */
+.finder-panel input[type="time"],
+.finder-panel input[type="number"] {
+  -moz-appearance: textfield;
+  min-width: 0;
+  width: 100%;
+}
+
 .field--start input:focus {
   border-color: #8AD8D4;
 }
@@ -133,12 +149,14 @@
   background: #C6E86B;
   border: 0;
   border-radius: 14px;
+  box-sizing: border-box;
   color: #1F2612;
   cursor: pointer;
   font-family: inherit;
   font-size: 15px;
   font-weight: 600;
   letter-spacing: 2px;
+  max-width: 100%;
   min-height: 52px;
   padding: 16px 32px;
   white-space: nowrap;
@@ -174,6 +192,7 @@
   flex-direction: column;
   font-family: inherit;
   gap: 4px;
+  min-width: 0;
   padding: 20px;
   text-align: left;
   transition: transform 0.15s ease;
@@ -186,6 +205,7 @@
 .venue-name {
   font-size: 18px;
   font-weight: 600;
+  overflow-wrap: break-word;
 }
 
 .venue-type {
@@ -253,6 +273,8 @@
   display: flex;
   flex-direction: column;
   min-height: 520px;
+  min-width: 0;
+  overflow-x: hidden;
   overflow-y: auto;
   padding: 32px;
 }
@@ -316,7 +338,13 @@
   display: grid;
   font-size: 13px;
   gap: 8px;
-  grid-template-columns: 80px 110px 90px 1fr;
+  grid-template-columns: 80px 110px 90px minmax(0, 1fr);
+}
+
+.schedule-row span,
+.schedule-row strong {
+  min-width: 0;
+  overflow-wrap: break-word;
 }
 
 .schedule-row strong {
@@ -407,6 +435,7 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
+  min-width: 0;
 }
 
 .admin-row span {
@@ -429,8 +458,11 @@
   background: #171412;
   border: 1px solid #35302b;
   border-radius: 10px;
+  box-sizing: border-box;
   color: white;
+  min-width: 0;
   padding: 8px;
+  width: 100%;
 }
 
 .schedule-editor textarea {
@@ -467,6 +499,7 @@
 
   .venue-header-tools,
   .search-input {
+    max-width: 100%;
     width: 100%;
   }
 
