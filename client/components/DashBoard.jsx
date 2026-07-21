@@ -115,7 +115,7 @@ function DashboardNotifications() {
         <p className="empty-day">No notifications right now.</p>
       ) : (
         <div className="dashboard-notice-list">
-          {notifications.slice(0, 4).map((notification) => (
+          {notifications.slice(0, 200).map((notification) => (
             <article className="dashboard-notice-card" key={notification._id}>
               <strong>{notification.title}</strong>
               <p>{notification.message}</p>
