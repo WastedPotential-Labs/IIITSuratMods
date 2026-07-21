@@ -3,6 +3,7 @@
   color: #f5f1ec;
   font-family: Poppins, Inter, sans-serif;
   min-height: 100%;
+  overflow-x: hidden;
   padding: 96px 56px 48px 112px;
 }
 
@@ -452,7 +453,8 @@
 
 @media (max-width: 800px) {
   .venue-page {
-    padding: 112px 20px 32px 96px;
+    padding: 88px 16px 24px 16px;
+    overflow-x: hidden;
   }
 
   .venue-header {
@@ -460,7 +462,7 @@
   }
 
   .venue-header h1 {
-    font-size: 38px;
+    font-size: 30px;
   }
 
   .venue-header-tools,
@@ -470,10 +472,17 @@
 
   .finder-panel {
     grid-template-columns: 1fr 1fr;
+    padding: 18px;
   }
 
   .find-btn {
     grid-column: 1 / -1;
+  }
+
+  .schedule-row {
+    grid-template-columns: 1fr 1fr;
+    gap: 4px 10px;
+    font-size: 12px;
   }
 }
 
@@ -484,5 +493,19 @@
 
   .finder-panel {
     grid-template-columns: 1fr;
+  }
+
+  .venue-header h1 {
+    font-size: 26px;
+  }
+}
+
+@media (max-width: 400px) {
+  .venue-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .venue-card {
+    padding: 16px;
   }
 }

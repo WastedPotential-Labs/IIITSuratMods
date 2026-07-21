@@ -23,6 +23,10 @@
   --orange-text: #261A0E;
 }
 
+html, body {
+  overflow-x: hidden;
+}
+
 .schedule-page {
   background: var(--schedule-bg);
   color: var(--schedule-text);
@@ -88,6 +92,7 @@
   display: flex;
   flex-direction: column;
   gap: 32px;
+  min-width: 0;
 }
 
 .schedule-empty {
@@ -102,9 +107,11 @@
 
 .schedule-grid-wrap {
   min-width: 0;
+  max-width: 100%;
   overflow-x: auto;
   padding-bottom: 10px;
   width: 100%;
+  -webkit-overflow-scrolling: touch;
 }
 
 .schedule-row-grid,
@@ -315,19 +322,100 @@
 
 @media (max-width: 760px) {
   .schedule-page {
-    padding: 112px 16px 24px 96px;
+    padding: 88px 16px 24px 16px;
+    overflow-x: hidden;
   }
 
   .schedule-hero {
     display: grid;
-    margin-bottom: 36px;
+    margin-bottom: 24px;
   }
 
   .schedule-hero h1 {
-    font-size: 40px;
+    font-size: 30px;
+  }
+
+  .schedule-hero p {
+    font-size: 14px;
+    margin-top: 10px;
   }
 
   .schedule-sidebar {
     grid-template-columns: 1fr;
+  }
+
+  /* Shrink columns and time gutter so more fits before scrolling kicks in */
+  :root {
+    --time-col: 64px;
+    --cell-min-h: 128px;
+  }
+
+  .schedule-grid--days,
+  .schedule-row-grid,
+  .banner-row {
+    min-width: 620px;
+  }
+
+  .schedule-row-grid,
+  .schedule-grid--days {
+    grid-template-columns: var(--time-col) repeat(var(--day-count), minmax(96px, 1fr));
+  }
+
+  .day-heading {
+    font-size: 14px;
+  }
+
+  .time-cell {
+    font-size: 12px;
+  }
+
+  .course-block {
+    padding: 12px 10px;
+    gap: 5px;
+  }
+
+  .course-block h3 {
+    font-size: 13px;
+  }
+
+  .course-title {
+    font-size: 11px;
+  }
+
+  .course-faculty {
+    font-size: 10px;
+  }
+
+  .course-block strong {
+    font-size: 10px;
+  }
+
+  /* Sticky time column so it stays visible while scrolling through days */
+  .time-cell,
+  .day-heading:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 2;
+  }
+
+  /* Visible scroll affordance */
+  .schedule-grid-wrap {
+    border: 1px solid #35302b;
+    border-radius: var(--radius);
+    position: relative;
+  }
+
+  .schedule-grid-wrap::after {
+    background: linear-gradient(to left, var(--schedule-bg), transparent);
+    bottom: 0;
+    content: "";
+    pointer-events: none;
+    position: sticky;
+    right: 0;
+    top: 0;
+    width: 24px;
+    height: 100%;
+    margin-left: -24px;
+    display: block;
   }
 }

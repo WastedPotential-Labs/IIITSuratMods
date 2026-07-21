@@ -4,9 +4,10 @@
   box-sizing: border-box;
 }
 
-body {
-  height: 100vh;
-  width: 100vw;
+html, body {
+  height: 100%;
+  width: 100%;
+  overflow-x: hidden;
   background: var(--bg);
 }
 
@@ -53,6 +54,7 @@ body {
   justify-content: center;
   align-items: center;
   margin-bottom: 8px;
+  text-align: center;
 }
 
 #head > h1 {
@@ -200,6 +202,7 @@ body {
 main {
   height: 100vh;
   overflow-y: auto;
+  overflow-x: hidden;
   background-color: var(--bg);
 }
 
@@ -210,11 +213,14 @@ main {
 .schedule-page {
   padding-left: 96px;
   padding-top: 96px;
+  padding-right: 24px;
+  padding-bottom: 24px;
 }
 
 .main-content {
   margin-left: 0;
   min-width: 0;
+  width: 100%;
   transition: margin-left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -222,14 +228,17 @@ main {
   margin-left: 280px;
 }
 
+/* Tablet and mobile */
 @media (max-width: 768px) {
   .dashboard,
   .venue-page,
   .academics-page,
   .profile-page,
   .schedule-page {
-    padding-left: 96px;
-    padding-top: 112px;
+    padding-left: 16px;
+    padding-right: 16px;
+    padding-top: 88px; /* just enough to clear the fixed toggle button */
+    padding-bottom: 24px;
   }
 
   .nav-backdrop {
@@ -241,7 +250,48 @@ main {
   }
 
   .navbar {
-    width: 100%;
+    width: 85%;
+    max-width: 320px;
     border-right: none;
+    padding: 80px 20px 24px;
+  }
+
+  .menu-toggle-btn {
+    top: 16px;
+    left: 16px;
+    width: 46px;
+    height: 46px;
+  }
+
+  #head > h1 {
+    font-size: 19px;
+  }
+}
+
+/* Small phones */
+@media (max-width: 400px) {
+  .dashboard,
+  .venue-page,
+  .academics-page,
+  .profile-page,
+  .schedule-page {
+    padding-left: 12px;
+    padding-right: 12px;
+    padding-top: 80px;
+  }
+
+  .navbar {
+    width: 100%;
+    max-width: none;
+    padding: 72px 16px 20px;
+  }
+
+  #head > h1 {
+    font-size: 17px;
+  }
+
+  .navbar ul li a {
+    padding: 12px 14px;
+    font-size: 13px;
   }
 }
