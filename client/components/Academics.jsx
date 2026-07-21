@@ -295,6 +295,7 @@ function CourseTable({ section }) {
 
 function BulletBlock({ title, item, textEntry }) {
   const bullets = textEntry?.bullets || [];
+  console.log(textEntry);
   const parsed = useMemo(() => parseCurriculum(bullets), [bullets]);
   const subjectSyllabus = useMemo(() => parseSubjectSyllabus(bullets), [bullets]);
   const preferred = bullets.filter(lineLooksLikeCourse);
@@ -350,16 +351,14 @@ export default function Academics() {
       })
       .catch((error) => setStatus(error.response?.data?.message || "Unable to load syllabus data from the database."));
   }, []);
-
   const profileSelection = useMemo(() => {
     if (!user) return null;
 
     const branch = branchByBatch[user.batch];
     const syllabusType = getSyllabusType(user.email);
     const semester = user.semester;
-
     const curriculum =
-      items.find((item) => item.branch === branch && item.syllabusType === syllabusType && item.semester === "Curriculum") ||
+      items.find((item) => item.branch === branch && item.syllabusType === syllabusType && item.semester === semester) ||
       items.find((item) => item.branch === branch && item.semester === "Curriculum");
 
     const semesterSyllabus =
@@ -368,7 +367,6 @@ export default function Academics() {
 
     return { branch, syllabusType, semester, curriculum, semesterSyllabus };
   }, [items, user]);
-
   if (!user) {
     return (
       <div className="academics-page">
