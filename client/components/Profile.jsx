@@ -1,9 +1,10 @@
-import { useState, useEffect } from "react";
-import axios from "axios";
+import { useEffect, useState } from "react";
+import api from "../src/api";
 import { useAuth } from "../context/Auth";
 import "./styling/Profile.css";
-import {BlinkBlur}  from 'react-loading-indicators';
+import { BlinkBlur } from "react-loading-indicators";
 import { useNavigate } from "react-router-dom";
+
 const allowedBatches = ["CSE 1", "CSE 2", "MNC", "ECE"];
 const allowedSemesters = [
   "Semester 1",
@@ -17,7 +18,7 @@ const allowedSemesters = [
 ];
 
 export default function Profile() {
-  const { user, setUser } = useAuth(); // current logged in user
+  const { user, setUser } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -30,20 +31,14 @@ export default function Profile() {
     semester: ""
   });
 
-  useEffect(() => {
-    fetchUserData();
-  }, []);
-
   const fetchUserData = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem("userToken");
-      const response = await axios.get("http://localhost:5000/api/auth/me", {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await api.get("/auth/me");
 
       if (response.data.user) {
         setUser(response.data.user);
+        localStorage.setItem("userProfile", JSON.stringify(response.data.user));
         setFormData({
           username: response.data.user.username,
           batch: response.data.user.batch,
@@ -59,41 +54,48 @@ export default function Profile() {
     }
   };
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
+  useEffect(() => {
+    fetchUserData();
+  }, []);
+
+  const handleInputChange = (event) => {
+    const { name, value } = event.target;
+    setFormData((previous) => ({
+      ...previous,
       [name]: value
     }));
   };
-  function handleLogout(){
+
+  const handleLogout = () => {
     localStorage.removeItem("userToken");
     localStorage.removeItem("userProfile");
-    window.location.reload();
-    nav('./login');
-  }
+    setUser(null);
+    nav("/login");
+  };
 
   const handleSave = async () => {
     try {
       setSaving(true);
       setError("");
-      
-      const token = localStorage.getItem("userToken");
-      const userId = user._id;
 
-      await axios.put(
-        `http://localhost:5000/api/auth/user/update`, // update api
-        {
-          username: formData.username,
-          batch: formData.batch,
-          semester: formData.semester
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` }
-        }
-      );
+      const response = await api.put("/auth/user/update", {
+        username: formData.username,
+        batch: formData.batch,
+        semester: formData.semester
+      });
 
-      await fetchUserData();
+      if (response.data.user) {
+        setUser(response.data.user);
+        localStorage.setItem("userProfile", JSON.stringify(response.data.user));
+        setFormData({
+          username: response.data.user.username,
+          batch: response.data.user.batch,
+          semester: response.data.user.semester
+        });
+      } else {
+        await fetchUserData();
+      }
+
       setIsEditing(false);
       setSuccess("Profile updated successfully!");
       setTimeout(() => setSuccess(""), 3000);
@@ -115,85 +117,87 @@ export default function Profile() {
     setError("");
   };
 
-  const extractStudentId = (email) => {
-    return email ? email.split("@")[0].toUpperCase() : "N/A";
-  };
+  const extractStudentId = (email) => (email ? email.split("@")[0].toUpperCase() : "N/A");
 
   if (loading) {
-    return <div className="loading-container">
-            <p>Loading profile...</p>
-            <BlinkBlur color="#0ea5e9" size="medium" text="" textColor="" />
-          </div>;
+    return (
+      <div className="profile-loading">
+        <p>Loading profile...</p>
+        <BlinkBlur color="#C6E86B" size="medium" text="" textColor="" />
+      </div>
+    );
   }
 
   if (!user) {
-    return <div className="profile-container"><p>Please login to view your profile</p></div>;
+    return (
+      <div className="profile-page">
+        <p className="profile-message">Please login to view your profile</p>
+      </div>
+    );
   }
 
   return (
-    <div id="mainbox">
-      <div className="profile-header">
-        <h1>Profile</h1>
-        <p>Manage your profile</p>
-      </div>
-
-      <div className="profile-content">
-        {/* Info Section */}
-        <div className="info-box">
-          <h2>Student Information</h2><br/>
-          <div className="info-grid">
-            <div className="info-item">
-              <span className="info-label">Name</span>
-              <span className="info-value">{user.username}</span>
-            </div>
-            <div className="info-item">
-              <span className="info-label">Email</span>
-              <span className="info-value">{user.email}</span>
-            </div>
-            <div className="info-item">
-              <span className="info-label">Student ID</span>
-              <span className="info-value">{extractStudentId(user.email)}</span>
-            </div>
-            <div className="info-item">
-              <span className="info-label">Batch</span>
-              <span className="info-value">{user.batch}</span>
-            </div>
-            <div className="info-item">
-              <span className="info-label">Semester</span>
-              <span className="info-value">{user.semester}</span>
-            </div>
-          </div>
+    <div className="profile-page">
+      <header className="profile-header">
+        <div>
+          <h1>Profile</h1>
+          <p>Manage your profile</p>
         </div>
+      </header>
 
-        {/* Edit Form Section */}
+      <main className="profile-content">
+        <section className="profile-card">
+          <h2>Student Information</h2>
+          <div className="info-grid">
+            <div className="info-tile info-tile--name">
+              <span className="tile-label">Name</span>
+              <span className="tile-value">{user.username}</span>
+            </div>
+
+            <div className="info-tile info-tile--email">
+              <span className="tile-label">Email</span>
+              <span className="tile-value">{user.email}</span>
+            </div>
+
+            <div className="info-tile info-tile--id">
+              <span className="tile-label">Student ID</span>
+              <span className="tile-value">{extractStudentId(user.email)}</span>
+            </div>
+
+            <div className="info-tile info-tile--batch">
+              <span className="tile-label">Batch</span>
+              <span className="tile-value">{user.batch}</span>
+            </div>
+
+            <div className="info-tile info-tile--sem">
+              <span className="tile-label">Semester</span>
+              <span className="tile-value">{user.semester}</span>
+            </div>
+
+            <div className="info-tile info-tile--empty" aria-hidden="true"></div>
+          </div>
+        </section>
+
         {isEditing && (
-          <div className="info-box">
-            <h2>Edit Profile</h2><br/>
+          <section className="profile-card profile-card--edit">
+            <h2>Edit Profile</h2>
             <form className="profile-form">
               <div className="form-group">
                 <label>NAME</label>
-                <div className="input-wrapper">
-                  <span className="input-icon">👤</span>
-                  <input
-                    type="text"
-                    name="username"
-                    value={formData.username}
-                    onChange={handleInputChange}
-                  />
+                <div className="profile-input-wrapper">
+                  <input type="text" name="username" value={formData.username} onChange={handleInputChange} />
                 </div>
               </div>
 
               <div className="form-group">
                 <label>BATCH</label>
-                <div className="input-wrapper">
-                  <select
-                    name="batch"
-                    value={formData.batch}
-                    onChange={handleInputChange}
-                  >
+                <div className="profile-input-wrapper">
+                  <select name="batch" value={formData.batch} onChange={handleInputChange}>
                     <option value="">Select Batch</option>
-                    {allowedBatches.map(batch => (
-                      <option key={batch} value={batch}>{batch}</option>
+                    {allowedBatches.map((batch) => (
+                      <option key={batch} value={batch}>
+                        {batch}
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -201,15 +205,13 @@ export default function Profile() {
 
               <div className="form-group">
                 <label>SEMESTER</label>
-                <div className="input-wrapper">
-                  <select
-                    name="semester"
-                    value={formData.semester}
-                    onChange={handleInputChange}
-                  >
+                <div className="profile-input-wrapper">
+                  <select name="semester" value={formData.semester} onChange={handleInputChange}>
                     <option value="">Select Semester</option>
-                    {allowedSemesters.map(sem => (
-                      <option key={sem} value={sem}>{sem}</option>
+                    {allowedSemesters.map((semester) => (
+                      <option key={semester} value={semester}>
+                        {semester}
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -219,44 +221,28 @@ export default function Profile() {
               {success && <div className="success-message">{success}</div>}
 
               <div className="form-actions">
-                <button
-                  type="button"
-                  className="save-btn"
-                  onClick={handleSave}
-                  disabled={saving}
-                >
+                <button type="button" className="save-btn" onClick={handleSave} disabled={saving}>
                   {saving ? "SAVING..." : "SAVE"}
                 </button>
-                <button
-                  type="button"
-                  className="cancel-btn"
-                  onClick={handleCancel}
-                  disabled={saving}
-                >
+                <button type="button" className="cancel-btn" onClick={handleCancel} disabled={saving}>
                   CANCEL
                 </button>
               </div>
             </form>
-          </div>
+          </section>
         )}
 
-        {/* Edit Profile Button */}
         {!isEditing && (
-          <>
-          <div className="action-box">
-            <button
-              className="edit-btn"
-              onClick={() => setIsEditing(true)}
-            >
+          <div className="profile-actions">
+            <button className="profile-btn profile-btn--edit" onClick={() => setIsEditing(true)}>
               EDIT PROFILE
             </button>
+            <button className="profile-btn profile-btn--logout" onClick={handleLogout}>
+              LOGOUT
+            </button>
           </div>
-          <div className="action-box">
-            <button className="logout-btn" onClick={handleLogout}>Logout</button>
-          </div>
-          </>
         )}
-      </div>
+      </main>
     </div>
   );
 }

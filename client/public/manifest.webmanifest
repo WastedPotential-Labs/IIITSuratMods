@@ -1,0 +1,42 @@
+{
+  "name": "IIITSuratMods",
+  "short_name": "IIIT Mods",
+  "description": "IIIT Surat timetable, venues, classroom availability, and academic notifications.",
+  "start_url": "/dashboard",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#171412",
+  "theme_color": "#171412",
+  "categories": ["education", "productivity"],
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/favicon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Venues",
+      "short_name": "Venues",
+      "description": "Find venue schedules and free classrooms.",
+      "url": "/venues",
+      "icons": [{ "src": "/favicon.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Timetable",
+      "short_name": "Timetable",
+      "description": "Open the weekly timetable.",
+      "url": "/timetable",
+      "icons": [{ "src": "/favicon.png", "sizes": "192x192" }]
+    }
+  ]
+}

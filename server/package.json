@@ -6,7 +6,12 @@
   "main": "server.js",
   "scripts": {
     "dev": "nodemon server.js",
-    "start": "node server.js"
+    "start": "node server.js",
+    "extract:timetables": "python scripts/extractTimetablePdfs.py",
+    "extract:syllabus-text": "python scripts/extractSyllabusText.py",
+    "seed:timetables": "node scripts/seedTimetableData.js",
+    "seed:syllabus": "node scripts/seedSyllabusData.js",
+    "make:admin": "node scripts/makeAdmin.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

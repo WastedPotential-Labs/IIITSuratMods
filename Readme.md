@@ -1,4 +1,4 @@
-# 🎓 IIIT Surat Modifications (NUSMods Clone)
+# 🎓 IIIT Surat Modifications
 
 Welcome to the official repository for the IIIT Surat MODs! This is an open-source, student-led platform designed to streamline timetables, course syllabi, and academic materials for our college community.
 
@@ -42,8 +42,3 @@ npm run dev
 ```
 ---
 
-## Environment Variables(.env)
-Inside your server folder create a file named ".env" and add the following line:
-PORT=5000
-
-Note: when we start using live database addtional secret database keys will be shared with you privately.

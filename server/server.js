@@ -1,20 +1,24 @@
 //all the code+comments written are cross verified with the documentation ; if u have any suggestions for improvement please let me know :)
 
-
-import dotenv from "dotenv";//
+// "dotenv/config" must be the FIRST import. ES module imports run before any
+// other code in this file, so a plain dotenv.config() call would execute only
+// AFTER app.js was already loaded — and app.js reads process.env.FRONTEND_URL
+// at load time for CORS. Importing dotenv/config loads .env during the import
+// phase, before app.js is evaluated.
+import "dotenv/config";
 import app from "./src/app.js";//importing the Express app from the src folder
 import connectDB from "./src/config/db.js";//connect to database from the src/config folder
-//call the function
-dotenv.config();//loads environment variables from a .env file into process.env. This allows you to keep sensitive information like database credentials and API keys out of your codebase and easily manage them in a separate file.
 
-const PORT = process.env.PORT || 5000;//sets the port number for the server to listen on. It first checks if there is a PORT environment variable defined (which is common in production environments), and if not, it defaults to 5000. This allows for flexibility in different deployment scenarios.
-//const - basically means that the variable can't be reassigned.
-connectDB();
+const PORT = process.env.PORT || 5000;//sets the port number for the server to listen on. It first checks if there is a PORT environment variable defined (which is common in production environments), and if not, it defaults to 5000.
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
-//reference from the documentation :)
+// Connect to MongoDB first, then start accepting requests. Listening before
+// the database is ready lets early requests hit routes that immediately fail.
+const start = async () => {
+  await connectDB();
 
-//app.listen` starts the Express server.
-//() => { ... }- runs after the server starts 
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+};
+
+start();

@@ -3,13 +3,27 @@ import nodemailer from "nodemailer";
 
 const OTP_LENGTH = 6;
 
+const requiredEmailVars = ["SMTP_HOST", "SMTP_USER", "SMTP_PASS", "MAIL_FROM"];
+
+export const isEmailConfigured = () => requiredEmailVars.every((name) => process.env[name]);
+
 const requireEmailConfig = () => {
-  const required = ["SMTP_HOST", "SMTP_USER", "SMTP_PASS", "MAIL_FROM"];
-  const missing = required.filter((name) => !process.env[name]);
+  const missing = requiredEmailVars.filter((name) => !process.env[name]);
 
   if (missing.length > 0) {
     throw new Error(`Email delivery is not configured. Missing: ${missing.join(", ")}`);
   }
+};
+
+// Local development fallback: when SMTP is not configured, print the OTP to
+// the server console instead of failing the whole signup/reset flow. Without
+// this, register() always returned 503 on a fresh checkout because .env has
+// no SMTP credentials.
+const logOtpToConsole = (kind, email, otp) => {
+  console.warn(
+    `[DEV EMAIL FALLBACK] SMTP is not configured (${requiredEmailVars.join(", ")}). ` +
+      `${kind} code for ${email}: ${otp} (expires in 10 minutes)`
+  );
 };
 
 const createTransporter = () => {
@@ -39,6 +53,11 @@ export const hashOtp = (userId, otp) => {
 };
 
 export const sendEmailOtp = async ({ email, otp }) => {
+  if (!isEmailConfigured()) {
+    logOtpToConsole("Verification", email, otp);
+    return;
+  }
+
   const transporter = createTransporter();
 
   await transporter.sendMail({
@@ -53,6 +72,11 @@ export const sendEmailOtp = async ({ email, otp }) => {
 };
 
 export const sendPasswordResetOtp = async ({ email, otp }) => {
+  if (!isEmailConfigured()) {
+    logOtpToConsole("Password reset", email, otp);
+    return;
+  }
+
   const transporter = createTransporter();
 
   await transporter.sendMail({

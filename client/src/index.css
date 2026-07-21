@@ -1,14 +1,46 @@
-body{
-  background-color: #0F1418;
-}
-*{
-  font-family: Inter;
-  color: white;
-}
-[data-sonner-toast] {
-  color: black !important;
+:root {
+  /* IIITSuratMods design palette (from the Claude Design project) */
+  --bg: #171412;
+  --surface: #221E1B;
+  --surface-dark: #1D1916;
+  --border: #35302B;
+  --text: #F5F1EC;
+  --heading: #FBF8F4;
+  --muted: #A89F96;
+  --placeholder: #6B635B;
+
+  --lime: #C6E86B;
+  --lime-hover: #D4F080;
+  --lime-text: #1F2612;
+  --gold: #F0D264;
+  --gold-hover: #F5E098;
+  --gold-text: #262015;
+  --teal: #8AD8D4;
+  --teal-text: #142625;
+  --coral: #DE7A6C;
+  --coral-hover: #E88F82;
+  --coral-text: #2B1310;
+  --purple: #B79CE8;
+  --purple-text: #1D1528;
+  --orange: #E8AA5C;
+  --orange-text: #261A0E;
 }
 
-[data-sonner-toast] * {
-  color: black !important;
+body {
+  background-color: var(--bg);
+  color: var(--text);
+}
+
+/* Font only — setting color on * would override the dark text inside the
+   colored tiles/cards (they rely on inherited color from their parent). */
+* {
+  font-family: 'Poppins', Inter, sans-serif;
+}
+
+input,
+select,
+textarea,
+button {
+  font-family: inherit;
+  color: inherit;
 }
