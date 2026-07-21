@@ -37,11 +37,16 @@ const formatSeedTime = (time) => {
   return `${String(hour).padStart(2, "0")}:${String(minuteValue).padStart(2, "0")} ${meridiem}`;
 };
 
+// NOTE: previously this re-filtered by `slot.dayOfWeek === today` on top of
+// the already-"today"-scoped API response (/timetable/imported/today).
+// That double filter broke in production whenever the server's notion of
+// "today" (server timezone/clock) didn't line up with the client's local
+// `dayjs()` day — e.g. server on UTC vs client on IST near midnight.
+// The backend endpoint is the source of truth for "today"; we just shape
+// the data here instead of re-deciding what "today" is.
 function getTodaysClassesFromSchedules(schedules) {
-  const day = dayjs().format("dddd").toLowerCase();
-
   return schedules
-    .filter((slot) => slot.dayOfWeek === day && !slot.isCancelled)
+    .filter((slot) => !slot.isCancelled)
     .sort((a, b) => a.startMinutes - b.startMinutes)
     .map((slot) => ({
       courseCode: slot.courseCode,
@@ -68,7 +73,9 @@ function useClassStatuses(timetable) {
     const current = dayjs(now.format('hh:mm A'), 'hh:mm A');
     let status = 'notLive';
 
-    if (current.isAfter(start) && current.isBefore(end)) status = 'live';
+    // isSame included so a class is marked live starting exactly at its start minute,
+    // not one minute after (isAfter alone was strictly-after).
+    if ((current.isAfter(start) || current.isSame(start)) && current.isBefore(end)) status = 'live';
 
     return { ...cls, status };
   });
@@ -142,8 +149,18 @@ function Dashboard() {
 
     api
       .get("/timetable/imported/today")
-      .then((response) => setTodaysImportedClasses(response.data.classes || []))
-      .catch(() => setTodaysImportedClasses([]));
+      .then((response) => {
+        const classes = response.data.classes || [];
+        // Temporary debug logging — remove once confirmed working against
+        // the deployed backend. Tells you whether the API itself is
+        // returning data, vs the old client-side filter eating it.
+        console.log("[dashboard] /timetable/imported/today ->", classes);
+        setTodaysImportedClasses(classes);
+      })
+      .catch((error) => {
+        console.log("[dashboard] failed to load today's classes:", error);
+        setTodaysImportedClasses([]);
+      });
   }, [user]);
 
   const todaysClasses = user ? getTodaysClassesFromSchedules(todaysImportedClasses) : getTodaysClasses(weeklyTimetableMock);
