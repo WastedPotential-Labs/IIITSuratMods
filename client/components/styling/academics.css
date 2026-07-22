@@ -227,6 +227,7 @@
 
 .table-scroll {
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   border: 1px solid var(--border);
   border-radius: 14px;
 }
@@ -430,9 +431,27 @@
   padding: 0;
 }
 
+/* ===================== RESPONSIVE ===================== */
+
+/* Tablet / narrow desktop */
+@media (max-width: 1024px) {
+  .academics-page {
+    padding: 40px 32px;
+  }
+
+  .academics-header h1 {
+    font-size: 44px;
+  }
+
+  .reference-grid {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  }
+}
+
+/* Tablet / large mobile */
 @media (max-width: 760px) {
   .academics-page {
-    padding: 32px 20px;
+    padding: 28px 18px;
   }
 
   .academics-header,
@@ -441,8 +460,22 @@
     display: grid;
   }
 
+  .academics-header {
+    gap: 14px;
+    margin-bottom: 18px;
+  }
+
   .academics-header h1 {
-    font-size: 38px;
+    font-size: 32px;
+  }
+
+  .academics-section h2 {
+    font-size: 22px;
+    margin-bottom: 10px;
+  }
+
+  .academics-section {
+    margin-bottom: 24px;
   }
 
   .academics-header input {
@@ -450,11 +483,151 @@
     width: 100%;
   }
 
+  .academics-header input,
+  .academic-controls select {
+    min-height: 46px;
+    padding: 12px 16px;
+    border-radius: 12px;
+  }
+
+  .academic-controls {
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .reference-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .reference-card,
+  .curriculum-panel,
+  .profile-syllabus-card,
+  .academics-empty,
+  .academics-status {
+    padding: 16px;
+    border-radius: 12px;
+  }
+
+  .profile-syllabus-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    margin-bottom: 20px;
+  }
+
+  .curriculum-panel__header {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .curriculum-panel__header a {
+    align-self: flex-start;
+  }
+
+  .curriculum-panel__header h3 {
+    font-size: 18px;
+  }
+
+  .curriculum-list {
+    margin-left: 14px;
+    max-height: 400px;
+  }
+
+  .curriculum-list li {
+    font-size: 13px;
+  }
+
+  .semester-title {
+    font-size: 12px;
+    letter-spacing: 2px;
+  }
+
+  .course-table {
+    font-size: 13px;
+    min-width: 480px;
+  }
+
+  .course-table th,
+  .course-table td {
+    padding: 9px 10px;
+  }
+
+  .subject-card {
+    padding: 16px;
+    border-radius: 12px;
+  }
+
   .subject-card__header {
-    display: grid;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .subject-card h4 {
+    font-size: 18px;
   }
 
   .credit-pills {
     justify-content: flex-start;
+  }
+
+  .unit-list {
+    grid-template-columns: 1fr;
+  }
+
+  .unit-card {
+    padding: 12px 14px;
+  }
+
+  .subject-footer {
+    margin-top: 12px;
+    padding-top: 10px;
+  }
+}
+
+/* Small phones */
+@media (max-width: 420px) {
+  .academics-page {
+    padding: 20px 12px;
+  }
+
+  .academics-header h1 {
+    font-size: 26px;
+  }
+
+  .academics-section h2 {
+    font-size: 19px;
+  }
+
+  .curriculum-panel__header span,
+  .curriculum-panel__header p {
+    font-size: 12px;
+  }
+
+  .subject-code {
+    font-size: 11px;
+  }
+
+  .subject-card h4 {
+    font-size: 16px;
+  }
+
+  .unit-card h5 {
+    font-size: 14px;
+  }
+
+  .course-table {
+    min-width: 420px;
+    font-size: 12px;
+  }
+
+  .reference-card h3 {
+    font-size: 16px;
+  }
+
+  .reference-card a,
+  .curriculum-panel__header a {
+    font-size: 12px;
+    padding: 8px 14px;
   }
 }
