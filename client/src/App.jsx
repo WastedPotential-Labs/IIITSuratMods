@@ -1,5 +1,5 @@
 import './App.css'
-import { Route, Routes, NavLink, useNavigate } from 'react-router-dom'
+import { Route, Routes, Navigate, NavLink, useNavigate, useLocation } from 'react-router-dom'
 import Admin from '../components/Admin'
 import Login from '../components/Login'
 import Profile from '../components/Profile'
@@ -14,6 +14,30 @@ import ForgotPassword from '../components/ForgotPassword'
 import Venues from '../components/Venues'
 import Notifications from '../components/Notifications'
 import Academics from '../components/Academics'
+
+function PrivateRoute({ children }) {
+  const { user } = useAuth();
+  const location = useLocation();
+
+  if (!user) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  return children;
+}
+
+function AdminRoute({ children }) {
+  const { user } = useAuth();
+  const location = useLocation();
+
+  if (!user) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+  if (user.role !== 'admin') {
+    return <Navigate to="/dashboard" replace />;
+  }
+  return children;
+}
 
 function App() {
   const { user, setUser } = useAuth();
@@ -68,16 +92,18 @@ function App() {
             {navBar ? '✕' : '≡'}
           </button>
           <Routes>
-            <Route path='/admin' element={<Admin />} />
-            <Route path='/profile' element={<Profile />} />
             <Route path='/login' element={<Login />} />
-            <Route path='/timetable' element={<TimeTable year={"2025-26"} />} />
-            <Route path='/venues' element={<Venues />} />
-            <Route path='/academics' element={<Academics />} />
-            <Route path='/dashboard' element={<DashBoard />} />
             <Route path="/signup" element={<SignUp />} />
             <Route path="/verify-email" element={<VerifyEmail />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
+
+            <Route path='/profile' element={<PrivateRoute><Profile /></PrivateRoute>} />
+            <Route path='/timetable' element={<PrivateRoute><TimeTable year={"2025-26"} /></PrivateRoute>} />
+            <Route path='/venues' element={<PrivateRoute><Venues /></PrivateRoute>} />
+            <Route path='/academics' element={<PrivateRoute><Academics /></PrivateRoute>} />
+            <Route path='/dashboard' element={<PrivateRoute><DashBoard /></PrivateRoute>} />
+            <Route path='/admin' element={<AdminRoute><Admin /></AdminRoute>} />
+
             <Route path='*' element={<Home />} />
           </Routes>
         </main>

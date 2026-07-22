@@ -55,6 +55,7 @@ html, body {
   align-items: center;
   margin-bottom: 8px;
   text-align: center;
+  cursor:default;
 }
 
 #head > h1 {
