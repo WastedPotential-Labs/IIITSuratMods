@@ -15,9 +15,6 @@ const PORT = process.env.PORT || 5000;//sets the port number for the server to l
 // the database is ready lets early requests hit routes that immediately fail.
 const start = async () => {
   await connectDB();
-  app.get("/ping",(req,res)=>{
-    res.sendStatus(200);
-  })
   app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
   });

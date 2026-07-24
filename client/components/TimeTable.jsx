@@ -9,6 +9,8 @@ const dayKeys = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturd
 
 const subjectColors = ["lime", "yellow", "teal", "coral", "purple", "orange"];
 
+const HOUR = 60;
+
 const formatSlot = (slot) =>
   slot
     .replace(/\s?AM|\s?PM/g, "")
@@ -24,13 +26,19 @@ const formatSeedTime = (time) => {
   return `${String(hour).padStart(2, "0")}:${String(minuteValue).padStart(2, "0")} ${meridiem}`;
 };
 
+const minutesToTime = (mins) => {
+  const h = Math.floor(mins / 60);
+  const m = mins % 60;
+  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+};
+
 const getSubjectMap = (rows) => {
   const map = new Map();
 
   rows.forEach((row) => {
     if (row.isBreak) return;
     row.schedule.forEach((course) => {
-      if (!course || map.has(course.courseCode)) return;
+      if (!course || course === "covered" || map.has(course.courseCode)) return;
       map.set(course.courseCode, {
         ...course,
         color: subjectColors[map.size % subjectColors.length]
@@ -54,31 +62,58 @@ const normalizeCourse = (slot) => ({
   semester: slot.semester,
   program: slot.program,
   source: slot.source,
-  rawText: slot.rawText
+  rawText: slot.rawText,
+  // A merged lab slot (e.g. "CS303/CS302") carries a "/" in its code — used to
+  // apply tighter, truncation-safe styling on small screens.
+  isLab: typeof slot.courseCode === "string" && slot.courseCode.includes("/")
 });
 
+// Builds one continuous hourly grid so every day's column lines up on every row.
+// Multi-hour slots (labs) span multiple rows via rowSpan instead of spawning a
+// separate, misaligned row the way exact "start-end" string grouping used to.
 const buildRowsFromSchedules = (schedules) => {
-  const timeSlots = [
-    ...new Map(
-      schedules
-        .slice()
-        .sort((a, b) => a.startMinutes - b.startMinutes)
-        .map((slot) => [`${slot.startTime}-${slot.endTime}`, slot])
-    ).values()
-  ];
+  if (!schedules.length) return [];
 
-  return timeSlots.map((slot) => ({
-    timeSlot: `${formatSeedTime(slot.startTime)} - ${formatSeedTime(slot.endTime)}`,
-    rawStartTime: slot.startTime,
-    rawEndTime: slot.endTime,
-    isBreak: false,
-    schedule: dayKeys.map((day) => {
-      const match = schedules.find(
-        (item) => item.dayOfWeek === day && item.startTime === slot.startTime && item.endTime === slot.endTime
+  const minStart = Math.min(...schedules.map((s) => s.startMinutes));
+  const maxEnd = Math.max(...schedules.map((s) => s.endMinutes));
+
+  const hourStarts = [];
+  for (let t = minStart; t < maxEnd; t += HOUR) hourStarts.push(t);
+
+  return hourStarts.map((start) => {
+    const end = start + HOUR;
+
+    const schedule = dayKeys.map((day) => {
+      // This hour already covered by a slot that started on an earlier row.
+      const covering = schedules.find(
+        (item) =>
+          item.dayOfWeek === day &&
+          item.startMinutes < start &&
+          item.endMinutes > start
       );
-      return match ? normalizeCourse(match) : null;
-    })
-  }));
+      if (covering) return "covered";
+
+      // A slot starts exactly on this hour.
+      const match = schedules.find(
+        (item) => item.dayOfWeek === day && item.startMinutes === start
+      );
+      if (!match) return null;
+
+      const rowSpan = Math.max(1, Math.round((match.endMinutes - match.startMinutes) / HOUR));
+      return { ...normalizeCourse(match), rowSpan };
+    });
+
+    const isBreak = schedule.every((c) => c === null);
+
+    return {
+      timeSlot: `${formatSeedTime(minutesToTime(start))} - ${formatSeedTime(minutesToTime(end))}`,
+      rawStartTime: minutesToTime(start),
+      rawEndTime: minutesToTime(end),
+      isBreak,
+      label: isBreak ? "Lunch Break" : undefined,
+      schedule
+    };
+  });
 };
 
 const emptyEditForm = { courseCode: "", courseName: "", facultyName: "", roomNo: "" };
@@ -301,27 +336,49 @@ export default function TimeTable(props) {
               ))}
             </div>
 
-            <div className="schedule-rows">
-              {data.map((row) => {
+            {/* Single continuous grid (not one grid per row) so a 2-hour lab
+                can span two rows with grid-row: span 2 and still keep every
+                other day's column aligned underneath/beside it. */}
+            <div
+              className="schedule-rows schedule-rows--grid"
+              style={{ gridTemplateRows: `repeat(${data.length}, auto)` }}
+            >
+              {data.map((row, rowIdx) => {
                 if (row.isBreak) {
                   return (
-                    <div className="banner-row" key={row.timeSlot}>
-                      {row.label}
+                    <div
+                      className="banner-row"
+                      style={{ gridRow: rowIdx + 1, gridColumn: "1 / -1" }}
+                      key={row.timeSlot}
+                    >
+                      {row.label || formatSlot(row.timeSlot)}
                     </div>
                   );
                 }
 
                 return (
-                  <div className="schedule-row-grid" key={row.timeSlot}>
-                    <div className="time-cell">{formatSlot(row.timeSlot)}</div>
+                  <div key={row.timeSlot} style={{ display: "contents" }}>
+                    <div
+                      className="time-cell"
+                      style={{ gridRow: rowIdx + 1, gridColumn: 1 }}
+                    >
+                      {formatSlot(row.timeSlot)}
+                    </div>
+
                     {row.schedule.map((course, index) => {
+                      const key = `${row.timeSlot}-${days[index]}`;
+
+                      // Covered by a rowSpan block from a row above — render nothing.
+                      if (course === "covered") return null;
+
                       if (!course) {
                         if (isAdmin && row.rawStartTime && row.rawEndTime) {
                           return (
                             <button
                               type="button"
                               className="empty-cell empty-cell--addable"
-                              key={`${row.timeSlot}-${days[index]}`}
+                              style={{ gridRow: rowIdx + 1, gridColumn: index + 2 }}
+                              key={key}
                               onClick={() => openAdd(dayKeys[index], row.rawStartTime, row.rawEndTime)}
                               aria-label={`Add a slot for ${days[index]} ${row.timeSlot}`}
                             >
@@ -329,22 +386,32 @@ export default function TimeTable(props) {
                             </button>
                           );
                         }
-                        return <div className="empty-cell" key={`${row.timeSlot}-${days[index]}`} />;
+                        return (
+                          <div
+                            className="empty-cell"
+                            style={{ gridRow: rowIdx + 1, gridColumn: index + 2 }}
+                            key={key}
+                          />
+                        );
                       }
 
                       const color = subjectMap.get(course.courseCode)?.color || "lime";
                       return (
                         <article
-                          className={`course-block block--${color}${isAdmin ? " course-block--editable" : ""}`}
-                          key={`${row.timeSlot}-${days[index]}-${course.courseCode}`}
+                          className={`course-block block--${color}${isAdmin ? " course-block--editable" : ""}${course.isLab ? " course-block--lab" : ""}`}
+                          style={{
+                            gridRow: `${rowIdx + 1} / span ${course.rowSpan || 1}`,
+                            gridColumn: index + 2
+                          }}
+                          key={`${key}-${course.courseCode}`}
                           onClick={() => openEdit(course)}
                           role={isAdmin ? "button" : undefined}
                           tabIndex={isAdmin ? 0 : undefined}
                         >
-                          <h3>{course.courseCode}</h3>
-                          <p className="course-title">{course.courseName}</p>
-                          <p className="course-faculty">{course.facultyName}</p>
-                          <strong>{course.roomNo}</strong>
+                          <h3 title={course.courseCode}>{course.courseCode}</h3>
+                          <p className="course-title" title={course.courseName}>{course.courseName}</p>
+                          <p className="course-faculty" title={course.facultyName}>{course.facultyName}</p>
+                          <strong title={course.roomNo}>{course.roomNo}</strong>
                           {isAdmin && <span className="edit-hint">Edit</span>}
                         </article>
                       );

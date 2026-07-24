@@ -114,24 +114,22 @@ html, body {
   -webkit-overflow-scrolling: touch;
 }
 
-.schedule-row-grid,
 .schedule-grid--days {
   display: grid;
   gap: var(--grid-gap);
   grid-template-columns: var(--time-col) repeat(var(--day-count), minmax(150px, 1fr));
-}
-
-.schedule-grid--days {
   margin-bottom: 20px;
   min-width: 1040px;
 }
 
-.schedule-rows {
+/* Single continuous grid for the whole schedule body (time column + all days,
+   every hour row). This replaces the old "one CSS grid per row" approach so a
+   2-hour lab block can use grid-row: span 2 and still land in the correct
+   column beneath/above the right neighbours — nothing else has to move. */
+.schedule-rows--grid {
   display: grid;
-}
-
-.schedule-row-grid {
-  margin-bottom: var(--grid-gap);
+  gap: var(--grid-gap);
+  grid-template-columns: var(--time-col) repeat(var(--day-count), minmax(150px, 1fr));
   min-width: 1040px;
 }
 
@@ -166,6 +164,26 @@ html, body {
   white-space: pre-line;
 }
 
+.empty-cell--addable {
+  align-items: center;
+  border: 1px dashed #3a352f;
+  color: var(--schedule-muted);
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  transition: background 0.12s ease, border-color 0.12s ease;
+}
+
+.empty-cell--addable:hover {
+  background: var(--schedule-surface);
+  border-color: var(--lime);
+}
+
+.add-icon {
+  font-size: 20px;
+  line-height: 1;
+}
+
 .course-block {
   display: flex;
   flex-direction: column;
@@ -179,25 +197,55 @@ html, body {
   font-size: 17px;
   font-weight: 600;
   letter-spacing: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .course-title {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
   font-size: 15px;
   font-weight: 500;
   line-height: 1.24;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .course-faculty {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
   font-size: 12px;
   font-weight: 300;
   line-height: 1.28;
   opacity: 0.72;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .course-block strong {
   font-size: 12px;
   font-weight: 600;
   margin-top: auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Merged lab slots ("CS303/CS302", "PPS Lab/OOP Lab", ...) carry a lot more
+   text than a normal single-course block. Let long codes/rooms wrap on the
+   "/" instead of forcing one unbroken line that gets clipped. */
+.course-block--lab h3,
+.course-block--lab strong {
+  overflow-wrap: break-word;
+  white-space: normal;
+  word-break: break-word;
+}
+
+.course-block--lab {
+  gap: 6px;
 }
 
 .block--lime {
@@ -240,9 +288,7 @@ html, body {
   font-weight: 600;
   justify-content: center;
   letter-spacing: 0;
-  margin-bottom: var(--grid-gap);
   min-height: 76px;
-  min-width: 1040px;
 }
 
 .schedule-sidebar {
@@ -348,16 +394,17 @@ html, body {
   :root {
     --time-col: 64px;
     --cell-min-h: 128px;
+    --grid-gap: 8px;
   }
 
   .schedule-grid--days,
-  .schedule-row-grid,
+  .schedule-rows--grid,
   .banner-row {
     min-width: 620px;
   }
 
-  .schedule-row-grid,
-  .schedule-grid--days {
+  .schedule-grid--days,
+  .schedule-rows--grid {
     grid-template-columns: var(--time-col) repeat(var(--day-count), minmax(96px, 1fr));
   }
 
@@ -388,6 +435,38 @@ html, body {
 
   .course-block strong {
     font-size: 10px;
+  }
+
+  /* --- Lab cards on mobile ---
+     These carry two merged courses ("CS303/CS302"), two rooms, two faculty
+     initials, joined by "/". At 96px-wide columns that's too much text for
+     the normal single-course sizing, so labs get their own smaller, tighter
+     scale and clamp harder rather than spilling out of the card. */
+  .course-block--lab {
+    gap: 3px;
+    padding: 8px 7px;
+  }
+
+  .course-block--lab h3 {
+    font-size: 10.5px;
+    line-height: 1.15;
+  }
+
+  .course-block--lab .course-title {
+    -webkit-line-clamp: 2;
+    font-size: 9px;
+    line-height: 1.15;
+  }
+
+  .course-block--lab .course-faculty {
+    -webkit-line-clamp: 1;
+    font-size: 8px;
+  }
+
+  .course-block--lab strong {
+    font-size: 8px;
+    line-height: 1.15;
+    white-space: normal;
   }
 
   /* Sticky time column so it stays visible while scrolling through days */
