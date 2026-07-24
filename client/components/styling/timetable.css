@@ -172,6 +172,21 @@ html, body {
   padding-bottom: 4px;
 }
 
+/* The Lunch Break column's header reuses .time-cell--header, but that class
+   sets background:none — fine for plain time labels floating above the
+   grid, but it meant the "Lunch Break" text had no box at all and just sat
+   on the dark page background, making it look like it had blended into the
+   background instead of reading as a header for the vertical banner below.
+   Give it the same surface color as that banner, with only the top corners
+   rounded, so header + banner read as one continuous panel. */
+.time-cell--header-break {
+  background: var(--schedule-surface);
+  border-radius: var(--radius) var(--radius) 0 0;
+  color: var(--schedule-text);
+  font-weight: 600;
+  padding: 8px 4px 10px;
+}
+
 /* The leading column now holds day names, not times — give it the same
    full-height dark cell treatment the time column used to have, but with
    the bolder day-heading type. */
@@ -505,15 +520,12 @@ html, body {
     padding-right: 34px;
   }
 
-  /* Sticky time column so it stays visible while scrolling through days */
-  .time-cell,
-  .day-heading:first-child {
+  .day-heading--row {
     position: sticky;
     left: 0;
     z-index: 2;
   }
 
-  /* Visible scroll affordance */
   .schedule-grid-wrap {
     border: 1px solid #35302b;
     border-radius: var(--radius);
@@ -680,12 +692,12 @@ html, body {
   }
 
   .edit-hint {
-    opacity: 0;
+    opacity: 1;
     right: 8px;
-    top: 8px;
+    top: 90px;
   }
   .edit-hint:hover{
-    opacity: 0;
+    opacity: 1;
   }
 }
 .edit-modal-actions--split {

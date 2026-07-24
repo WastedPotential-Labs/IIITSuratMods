@@ -63,14 +63,9 @@ const normalizeCourse = (slot) => ({
   program: slot.program,
   source: slot.source,
   rawText: slot.rawText,
-  // A merged lab slot (e.g. "CS303/CS302") carries a "/" in its code — used to
-  // apply tighter, truncation-safe styling on small screens.
   isLab: typeof slot.courseCode === "string" && slot.courseCode.includes("/")
 });
 
-// Builds one continuous hourly grid so every day's column lines up on every row.
-// Multi-hour slots (labs) span multiple rows via rowSpan instead of spawning a
-// separate, misaligned row the way exact "start-end" string grouping used to.
 const buildRowsFromSchedules = (schedules) => {
   if (!schedules.length) return [];
 
@@ -84,7 +79,6 @@ const buildRowsFromSchedules = (schedules) => {
     const end = start + HOUR;
 
     const schedule = dayKeys.map((day) => {
-      // This hour already covered by a slot that started on an earlier row.
       const covering = schedules.find(
         (item) =>
           item.dayOfWeek === day &&
@@ -93,7 +87,6 @@ const buildRowsFromSchedules = (schedules) => {
       );
       if (covering) return "covered";
 
-      // A slot starts exactly on this hour.
       const match = schedules.find(
         (item) => item.dayOfWeek === day && item.startMinutes === start
       );
@@ -329,13 +322,13 @@ export default function TimeTable(props) {
       {data.length > 0 && (
         <div className="schedule-layout">
           <div className="schedule-grid-wrap">
-            {/* Time slots run across the top; days run down the side. A lab
-                that spans 2 hours now spans 2 COLUMNS (grid-column: span N)
-                on its one day-row, instead of 2 rows down a day-column. */}
             <div className="schedule-grid--days">
               <div />
               {data.map((row) => (
-                <div className="time-cell time-cell--header" key={`head-${row.timeSlot}`}>
+                <div
+                  className={`time-cell time-cell--header${row.isBreak ? " time-cell--header-break" : ""}`}
+                  key={`head-${row.timeSlot}`}
+                >
                   {row.isBreak ? (row.label || formatSlot(row.timeSlot)) : formatSlot(row.timeSlot)}
                 </div>
               ))}
@@ -345,9 +338,6 @@ export default function TimeTable(props) {
               className="schedule-rows schedule-rows--grid"
               style={{ gridTemplateRows: `repeat(${dayKeys.length}, auto)` }}
             >
-              {/* Lunch (or any hour nobody has anything in) becomes one tall
-                  banner column spanning every day-row, instead of one wide
-                  banner row spanning every day-column. */}
               {data.map((row, colIdx) =>
                 row.isBreak ? (
                   <div
@@ -355,7 +345,6 @@ export default function TimeTable(props) {
                     style={{ gridRow: `1 / span ${dayKeys.length}`, gridColumn: colIdx + 2 }}
                     key={`break-${row.timeSlot}`}
                   >
-                    {row.label || formatSlot(row.timeSlot)}
                   </div>
                 ) : null
               )}
@@ -367,12 +356,11 @@ export default function TimeTable(props) {
                   </div>
 
                   {data.map((row, colIdx) => {
-                    if (row.isBreak) return null; // covered by the vertical banner column above
+                    if (row.isBreak) return null; 
 
                     const course = row.schedule[dayIdx];
                     const key = `${dayKey}-${row.timeSlot}`;
 
-                    // Covered by a colSpan block from a column to the left — render nothing.
                     if (course === "covered") return null;
 
                     if (!course) {
