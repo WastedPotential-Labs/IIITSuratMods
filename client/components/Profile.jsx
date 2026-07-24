@@ -5,7 +5,7 @@ import "./styling/Profile.css";
 import { BlinkBlur } from "react-loading-indicators";
 import { useNavigate } from "react-router-dom";
 
-const allowedBatches = ["CSE 1", "CSE 2", "MNC", "ECE"];
+const allowedBatches = ["CSE","CSE 1", "CSE 2", "MNC", "ECE"];
 const allowedSemesters = [
   "Semester 1",
   "Semester 2",

@@ -1,6 +1,6 @@
 import User from "../models/User.js";
 
-const allowedBatches = ["CSE 1", "CSE 2", "MNC", "ECE"];
+const allowedBatches = ["CSE","CSE 1", "CSE 2", "MNC", "ECE"];
 const allowedSemesters = [
   "Semester 1",
   "Semester 2",
@@ -38,7 +38,6 @@ export const updateMyProfile = async (req, res) => {
     if (!allowedBatches.includes(batch) || !allowedSemesters.includes(semester)) {
       return res.status(400).json({ message: "Batch or semester is not valid" });
     }
-
     const user = await User.findByIdAndUpdate(
       req.user._id,
       { username, batch, semester },

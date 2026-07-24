@@ -313,7 +313,7 @@ export default function TimeTable(props) {
   };
 
   return (
-    <section className="schedule-page" style={{ "--day-count": days.length }}>
+    <section className="schedule-page" style={{ "--slot-count": data.length || 1 }}>
       <header className="schedule-hero">
         <div>
           <h1>Weekly Timetable</h1>
@@ -329,96 +329,105 @@ export default function TimeTable(props) {
       {data.length > 0 && (
         <div className="schedule-layout">
           <div className="schedule-grid-wrap">
+            {/* Time slots run across the top; days run down the side. A lab
+                that spans 2 hours now spans 2 COLUMNS (grid-column: span N)
+                on its one day-row, instead of 2 rows down a day-column. */}
             <div className="schedule-grid--days">
               <div />
-              {days.map((day) => (
-                <div className="day-heading" key={day}>{day}</div>
+              {data.map((row) => (
+                <div className="time-cell time-cell--header" key={`head-${row.timeSlot}`}>
+                  {row.isBreak ? (row.label || formatSlot(row.timeSlot)) : formatSlot(row.timeSlot)}
+                </div>
               ))}
             </div>
 
-            {/* Single continuous grid (not one grid per row) so a 2-hour lab
-                can span two rows with grid-row: span 2 and still keep every
-                other day's column aligned underneath/beside it. */}
             <div
               className="schedule-rows schedule-rows--grid"
-              style={{ gridTemplateRows: `repeat(${data.length}, auto)` }}
+              style={{ gridTemplateRows: `repeat(${dayKeys.length}, auto)` }}
             >
-              {data.map((row, rowIdx) => {
-                if (row.isBreak) {
-                  return (
-                    <div
-                      className="banner-row"
-                      style={{ gridRow: rowIdx + 1, gridColumn: "1 / -1" }}
-                      key={row.timeSlot}
-                    >
-                      {row.label || formatSlot(row.timeSlot)}
-                    </div>
-                  );
-                }
+              {/* Lunch (or any hour nobody has anything in) becomes one tall
+                  banner column spanning every day-row, instead of one wide
+                  banner row spanning every day-column. */}
+              {data.map((row, colIdx) =>
+                row.isBreak ? (
+                  <div
+                    className="banner-row banner-row--vertical"
+                    style={{ gridRow: `1 / span ${dayKeys.length}`, gridColumn: colIdx + 2 }}
+                    key={`break-${row.timeSlot}`}
+                  >
+                    {row.label || formatSlot(row.timeSlot)}
+                  </div>
+                ) : null
+              )}
 
-                return (
-                  <div key={row.timeSlot} style={{ display: "contents" }}>
-                    <div
-                      className="time-cell"
-                      style={{ gridRow: rowIdx + 1, gridColumn: 1 }}
-                    >
-                      {formatSlot(row.timeSlot)}
-                    </div>
+              {dayKeys.map((dayKey, dayIdx) => (
+                <div key={dayKey} style={{ display: "contents" }}>
+                  <div className="day-heading day-heading--row" style={{ gridRow: dayIdx + 1, gridColumn: 1 }}>
+                    {days[dayIdx]}
+                  </div>
 
-                    {row.schedule.map((course, index) => {
-                      const key = `${row.timeSlot}-${days[index]}`;
+                  {data.map((row, colIdx) => {
+                    if (row.isBreak) return null; // covered by the vertical banner column above
 
-                      // Covered by a rowSpan block from a row above — render nothing.
-                      if (course === "covered") return null;
+                    const course = row.schedule[dayIdx];
+                    const key = `${dayKey}-${row.timeSlot}`;
 
-                      if (!course) {
-                        if (isAdmin && row.rawStartTime && row.rawEndTime) {
-                          return (
-                            <button
-                              type="button"
-                              className="empty-cell empty-cell--addable"
-                              style={{ gridRow: rowIdx + 1, gridColumn: index + 2 }}
-                              key={key}
-                              onClick={() => openAdd(dayKeys[index], row.rawStartTime, row.rawEndTime)}
-                              aria-label={`Add a slot for ${days[index]} ${row.timeSlot}`}
-                            >
-                              <span className="add-icon">+</span>
-                            </button>
-                          );
-                        }
+                    // Covered by a colSpan block from a column to the left — render nothing.
+                    if (course === "covered") return null;
+
+                    if (!course) {
+                      if (isAdmin && row.rawStartTime && row.rawEndTime) {
                         return (
-                          <div
-                            className="empty-cell"
-                            style={{ gridRow: rowIdx + 1, gridColumn: index + 2 }}
+                          <button
+                            type="button"
+                            className="empty-cell empty-cell--addable"
+                            style={{ gridRow: dayIdx + 1, gridColumn: colIdx + 2 }}
                             key={key}
-                          />
+                            onClick={() => openAdd(dayKey, row.rawStartTime, row.rawEndTime)}
+                            aria-label={`Add a slot for ${days[dayIdx]} ${row.timeSlot}`}
+                          >
+                            <span className="add-icon">+</span>
+                          </button>
                         );
                       }
-
-                      const color = subjectMap.get(course.courseCode)?.color || "lime";
                       return (
-                        <article
-                          className={`course-block block--${color}${isAdmin ? " course-block--editable" : ""}${course.isLab ? " course-block--lab" : ""}`}
-                          style={{
-                            gridRow: `${rowIdx + 1} / span ${course.rowSpan || 1}`,
-                            gridColumn: index + 2
-                          }}
-                          key={`${key}-${course.courseCode}`}
-                          onClick={() => openEdit(course)}
-                          role={isAdmin ? "button" : undefined}
-                          tabIndex={isAdmin ? 0 : undefined}
-                        >
-                          <h3 title={course.courseCode}>{course.courseCode}</h3>
-                          <p className="course-title" title={course.courseName}>{course.courseName}</p>
-                          <p className="course-faculty" title={course.facultyName}>{course.facultyName}</p>
-                          <strong title={course.roomNo}>{course.roomNo}</strong>
-                          {isAdmin && <span className="edit-hint">Edit</span>}
-                        </article>
+                        <div
+                          className="empty-cell"
+                          style={{ gridRow: dayIdx + 1, gridColumn: colIdx + 2 }}
+                          key={key}
+                        />
                       );
-                    })}
-                  </div>
-                );
-              })}
+                    }
+
+                    const color = subjectMap.get(course.courseCode)?.color || "lime";
+                    return (
+                      <article
+                        className={`course-block block--${color}${course.isLab ? " course-block--lab" : ""}`}
+                        style={{
+                          gridRow: dayIdx + 1,
+                          gridColumn: `${colIdx + 2} / span ${course.rowSpan || 1}`
+                        }}
+                        key={`${key}-${course.courseCode}`}
+                      >
+                        <h3 title={course.courseCode}>{course.courseCode}</h3>
+                        <p className="course-title" title={course.courseName}>{course.courseName}</p>
+                        <p className="course-faculty" title={course.facultyName}>{course.facultyName}</p>
+                        <strong title={course.roomNo}>{course.roomNo}</strong>
+                        {isAdmin && (
+                          <button
+                            type="button"
+                            className="edit-hint"
+                            onClick={() => openEdit(course)}
+                            aria-label={`Edit ${course.courseCode}`}
+                          >
+                            Edit
+                          </button>
+                        )}
+                      </article>
+                    );
+                  })}
+                </div>
+              ))}
             </div>
           </div>
 

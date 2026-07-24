@@ -17,7 +17,7 @@ const OTP_EXPIRY_MINUTES = 10;
 const OTP_COOLDOWN_SECONDS = 60;
 const MAX_OTP_ATTEMPTS = 5;
 
-const allowedBatches = ["CSE 1", "CSE 2", "MNC", "ECE"];
+const allowedBatches = ["CSE","CSE 1", "CSE 2", "MNC", "ECE"];
 
 const allowedSemesters = [
   "Semester 1",

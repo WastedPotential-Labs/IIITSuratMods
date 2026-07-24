@@ -99,6 +99,7 @@ export default function SignUp() {
                 className="select-input"
                 required
               >
+                <option value="CSE 1">CSE</option>
                 <option value="CSE 1">CSE 1</option>
                 <option value="CSE 2">CSE 2</option>
                 <option value="MNC">MNC</option>

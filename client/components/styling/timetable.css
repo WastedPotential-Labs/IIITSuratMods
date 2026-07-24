@@ -21,6 +21,7 @@
   --purple-text: #1D1528;
   --orange: #E8AA5C;
   --orange-text: #261A0E;
+  --slot-min: 150px;
 }
 
 html, body {
@@ -117,19 +118,18 @@ html, body {
 .schedule-grid--days {
   display: grid;
   gap: var(--grid-gap);
-  grid-template-columns: var(--time-col) repeat(var(--day-count), minmax(150px, 1fr));
+  grid-template-columns: var(--time-col) repeat(var(--slot-count), minmax(var(--slot-min), 1fr));
   margin-bottom: 20px;
   min-width: 1040px;
 }
 
-/* Single continuous grid for the whole schedule body (time column + all days,
-   every hour row). This replaces the old "one CSS grid per row" approach so a
-   2-hour lab block can use grid-row: span 2 and still land in the correct
-   column beneath/above the right neighbours — nothing else has to move. */
+/* Single continuous grid for the whole schedule body (day column + all time
+   slots, every day row). A lab spanning 2 hours uses grid-column: span 2 so
+   it lands in the right day-row and pushes nothing else out of place. */
 .schedule-rows--grid {
   display: grid;
   gap: var(--grid-gap);
-  grid-template-columns: var(--time-col) repeat(var(--day-count), minmax(150px, 1fr));
+  grid-template-columns: var(--time-col) repeat(var(--slot-count), minmax(var(--slot-min), 1fr));
   min-width: 1040px;
 }
 
@@ -162,6 +162,26 @@ html, body {
   line-height: 1.55;
   text-align: center;
   white-space: pre-line;
+}
+
+/* The top row now holds time labels, not day labels — keep it compact
+   instead of inheriting the full row height meant for data cells. */
+.time-cell--header {
+  background: none;
+  min-height: auto;
+  padding-bottom: 4px;
+}
+
+/* The leading column now holds day names, not times — give it the same
+   full-height dark cell treatment the time column used to have, but with
+   the bolder day-heading type. */
+.day-heading--row {
+  align-items: center;
+  background: var(--schedule-surface-dark);
+  border-radius: var(--radius);
+  display: flex;
+  justify-content: center;
+  min-height: var(--cell-min-h);
 }
 
 .empty-cell--addable {
@@ -291,6 +311,15 @@ html, body {
   min-height: 76px;
 }
 
+/* Lunch/gap column now runs top-to-bottom across every day-row instead of
+   left-to-right across every day-column. */
+.banner-row--vertical {
+  min-height: 0;
+  padding: 12px 6px;
+  text-align: center;
+  white-space: pre-line;
+}
+
 .schedule-sidebar {
   display: grid;
   gap: 28px;
@@ -395,17 +424,13 @@ html, body {
     --time-col: 64px;
     --cell-min-h: 128px;
     --grid-gap: 8px;
+    --slot-min: 96px;
   }
 
   .schedule-grid--days,
   .schedule-rows--grid,
   .banner-row {
     min-width: 620px;
-  }
-
-  .schedule-grid--days,
-  .schedule-rows--grid {
-    grid-template-columns: var(--time-col) repeat(var(--day-count), minmax(96px, 1fr));
   }
 
   .day-heading {
@@ -469,6 +494,17 @@ html, body {
     white-space: normal;
   }
 
+  .edit-hint {
+    font-size: 8px;
+    padding: 3px 7px;
+    right: 6px;
+    top: 6px;
+  }
+
+  .course-block--lab h3 {
+    padding-right: 34px;
+  }
+
   /* Sticky time column so it stays visible while scrolling through days */
   .time-cell,
   .day-heading:first-child {
@@ -498,40 +534,39 @@ html, body {
     display: block;
   }
 }
-.course-block--editable {
-  cursor: pointer;
+/* course-block is the positioning context for the Edit button in its corner */
+.course-block {
   position: relative;
-  transition: transform 0.12s ease, box-shadow 0.12s ease;
 }
 
-.course-block--editable:hover,
-.course-block--editable:focus-visible {
-  box-shadow: 0 0 0 2px rgba(23, 20, 18, 0.35);
-  transform: translateY(-2px);
-  outline: none;
-}
-
+/* A real, always-visible button (not a hover-only hint) so it works on touch
+   devices where there's no hover state to reveal it. */
 .edit-hint {
   align-items: center;
   background: rgba(23, 20, 18, 0.16);
+  border: none;
   border-radius: 999px;
+  color: inherit;
+  cursor: pointer;
   display: inline-flex;
+  font-family: Poppins, Inter, sans-serif;
   font-size: 10px;
   font-weight: 600;
   justify-content: center;
   letter-spacing: 0.04em;
-  opacity: 0;
-  padding: 3px 9px;
+  padding: 4px 10px;
   position: absolute;
-  right: 12px;
+  right: 10px;
   text-transform: uppercase;
-  top: 12px;
-  transition: opacity 0.12s ease;
+  top: 10px;
+  transition: background 0.12s ease, transform 0.12s ease;
 }
 
-.course-block--editable:hover .edit-hint,
-.course-block--editable:focus-visible .edit-hint {
-  opacity: 1;
+.edit-hint:hover,
+.edit-hint:focus-visible {
+  background: rgba(23, 20, 18, 0.32);
+  outline: none;
+  transform: translateY(-1px);
 }
 
 .edit-modal-backdrop {
